@@ -2488,7 +2488,7 @@
         const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
         const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
         const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
-        const FETCH_TIMEOUT_MS = 10000; // Reduced from 15s to 10s for faster fallback
+        const FETCH_TIMEOUT_MS = 15000;
 
         const COOKIE_CONSENT_KEY = 'iran_weather_cookie_consent';
         const COOKIE_CITIES_KEY = 'iran_weather_cities';
@@ -2560,25 +2560,6 @@
                     .then(res => { clearTimeout(timer); resolve(res); })
                     .catch(err => { clearTimeout(timer); reject(err); });
             });
-        }
-
-        // ✅ NEW: Retry mechanism for failed fetches
-        async function fetchWithRetry(url, timeout = FETCH_TIMEOUT_MS, maxRetries = 2) {
-            let lastError;
-            for (let i = 0; i <= maxRetries; i++) {
-                try {
-                    const res = await fetchWithTimeout(url, {}, timeout);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res;
-                } catch (err) {
-                    lastError = err;
-                    if (i < maxRetries) {
-                        console.warn(`Fetch failed, retrying (${i + 1}/${maxRetries})...`, err.message);
-                        await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Exponential backoff
-                    }
-                }
-            }
-            throw lastError;
         }
 
         const cacheSupported = (() => {
@@ -3097,83 +3078,136 @@
             return { name: r.name, lat: r.latitude, lon: r.longitude, country: r.country_code };
         }
 
-        // ✅ REWRITTEN: Chunked fetching for faster and more reliable data retrieval
+        // ============================================================
+        //  WEATHER FETCHING — Two-strategy approach
+        // ============================================================
+
         async function fetchAllCitiesData(citiesList) {
             if (!citiesList || citiesList.length === 0) return [];
 
-            const CHUNK_SIZE = 5; // Max 5 cities per API call to prevent URL length limits and timeouts
-            const chunks = [];
-            for (let i = 0; i < citiesList.length; i += CHUNK_SIZE) {
-                chunks.push(citiesList.slice(i, i + CHUNK_SIZE));
+            // ============ STRATEGY 1: Single batch request for ALL cities ============
+            try {
+                console.log(`🌐 Batch request for ${citiesList.length} cities...`);
+                const batchResults = await fetchBatch(citiesList);
+                const successCount = batchResults.filter(r => r.weather && r.weather.current).length;
+                console.log(`✅ Batch result: ${successCount}/${citiesList.length} successful`);
+
+                if (successCount > 0) {
+                    cachePut('weather-data', batchResults).catch(() => { });
+                    return batchResults;
+                }
+            } catch (err) {
+                console.warn('❌ Batch request failed:', err.message);
             }
 
-            const allResults = [];
+            // ============ STRATEGY 2: Individual requests per city in groups ============
+            console.log('🔄 Falling back to individual city requests...');
+            const results = [];
+            const GROUP_SIZE = 5;
 
-            // Fetch chunks sequentially to avoid rate limits, but weather+aqi in parallel per chunk
-            for (const chunk of chunks) {
-                try {
-                    const latParam = chunk.map(c => c.lat).join(',');
-                    const lonParam = chunk.map(c => c.lon).join(',');
+            for (let i = 0; i < citiesList.length; i += GROUP_SIZE) {
+                const group = citiesList.slice(i, i + GROUP_SIZE);
+                const groupResults = await Promise.all(group.map(city => fetchSingleCity(city)));
+                results.push(...groupResults);
 
-                    const weatherParams = [
-                        'current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dew_point_2m',
-                        'daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
-                        'timezone=auto',
-                        'forecast_days=7'
-                    ].join('&');
-
-                    const weatherUrl = `${WEATHER_API}?latitude=${latParam}&longitude=${lonParam}&${weatherParams}`;
-                    const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
-
-                    // Use Promise.allSettled to not fail entirely if one of the APIs fails
-                    const [weatherRes, aqiRes] = await Promise.allSettled([
-                        fetchWithRetry(weatherUrl, 10000, 2),
-                        fetchWithRetry(aqiUrl, 10000, 2)
-                    ]);
-
-                    let weatherArr = [];
-                    if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
-                        const json = await weatherRes.value.json();
-                        weatherArr = Array.isArray(json) ? json : [json];
-                    }
-
-                    let aqiArr = [];
-                    if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
-                        const json = await aqiRes.value.json();
-                        aqiArr = Array.isArray(json) ? json : [json];
-                    }
-
-                    chunk.forEach((city, i) => {
-                        allResults.push({
-                            city,
-                            weather: weatherArr[i] || null,
-                            aqi: aqiArr[i]?.current?.european_aqi ?? null
-                        });
-                    });
-
-                    // Small delay between chunks to be nice to the API
-                    if (chunks.indexOf(chunk) < chunks.length - 1) {
-                        await new Promise(r => setTimeout(r, 300));
-                    }
-                } catch (err) {
-                    console.error(`Chunk fetch failed for:`, chunk.map(c => c.name).join(', '), err);
-                    chunk.forEach(city => {
-                        allResults.push({ city, weather: null, aqi: null });
-                    });
+                if (i + GROUP_SIZE < citiesList.length) {
+                    await new Promise(r => setTimeout(r, 250));
                 }
             }
 
-            // Restore original order
-            const finalResults = citiesList.map(city => {
-                return allResults.find(r => r.city.name === city.name && r.city.lat === city.lat) || { city, weather: null, aqi: null };
-            });
+            const successCount = results.filter(r => r.weather && r.weather.current).length;
+            console.log(`✅ Individual result: ${successCount}/${citiesList.length} successful`);
 
-            // Cache the successful results
-            if (finalResults.some(r => r.weather)) {
-                cachePut('weather-data', finalResults).catch(() => { });
+            if (successCount > 0) {
+                cachePut('weather-data', results).catch(() => { });
             }
 
-            return finalResults;
+            return results;
+        }
+
+        async function fetchBatch(citiesList) {
+            const latParam = citiesList.map(c => c.lat).join(',');
+            const lonParam = citiesList.map(c => c.lon).join(',');
+
+            const weatherParams = [
+                'current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dew_point_2m',
+                'daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
+                'timezone=auto',
+                'forecast_days=7'
+            ].join('&');
+
+            const weatherUrl = `${WEATHER_API}?latitude=${latParam}&longitude=${lonParam}&${weatherParams}`;
+            const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
+
+            const [weatherRes, aqiRes] = await Promise.allSettled([
+                fetchWithTimeout(weatherUrl, {}, 15000),
+                fetchWithTimeout(aqiUrl, {}, 15000)
+            ]);
+
+            let weatherArr = [];
+            if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
+                try {
+                    const json = await weatherRes.value.json();
+                    weatherArr = Array.isArray(json) ? json : [json];
+                } catch (e) {
+                    console.error('Weather JSON parse failed:', e);
+                }
+            } else {
+                console.error('Weather batch failed:', weatherRes.reason || weatherRes.value?.status);
+            }
+
+            let aqiArr = [];
+            if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
+                try {
+                    const json = await aqiRes.value.json();
+                    aqiArr = Array.isArray(json) ? json : [json];
+                } catch (e) {
+                    console.error('AQI JSON parse failed:', e);
+                }
+            }
+
+            return citiesList.map((city, i) => ({
+                city,
+                weather: weatherArr[i] || null,
+                aqi: aqiArr[i]?.current?.european_aqi ?? null
+            }));
+        }
+
+        async function fetchSingleCity(city) {
+            try {
+                const weatherParams = [
+                    'current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dew_point_2m',
+                    'daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
+                    'timezone=auto',
+                    'forecast_days=7'
+                ].join('&');
+
+                const weatherUrl = `${WEATHER_API}?latitude=${city.lat}&longitude=${city.lon}&${weatherParams}`;
+                const aqiUrl = `${AQI_API}?latitude=${city.lat}&longitude=${city.lon}&current=european_aqi,pm2_5,pm10&timezone=auto`;
+
+                const [weatherRes, aqiRes] = await Promise.allSettled([
+                    fetchWithTimeout(weatherUrl, {}, 12000),
+                    fetchWithTimeout(aqiUrl, {}, 12000)
+                ]);
+
+                let weather = null;
+                if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
+                    try { weather = await weatherRes.value.json(); } catch (e) { }
+                }
+
+                let aqi = null;
+                if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
+                    try {
+                        const aqiJson = await aqiRes.value.json();
+                        aqi = aqiJson?.current?.european_aqi ?? null;
+                    } catch (e) { }
+                }
+
+                return { city, weather, aqi };
+            } catch (err) {
+                console.error(`Failed ${city.name}:`, err);
+                return { city, weather: null, aqi: null };
+            }
         }
 
         function createCard(item) {
@@ -3317,7 +3351,7 @@
                     renderCards(validResults);
                     errorBanner.classList.remove('visible');
                     lastUpdateEl.textContent = `Last: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-                    
+
                     if (successCount === totalCount) {
                         setStatus('Updated ✅');
                     } else {
