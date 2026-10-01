@@ -259,7 +259,6 @@
             gap: 0.5rem;
         }
 
-        /* ✅ تغییر: از چرخش به حرکت آروم بالا-پایین */
         .title h1 .title-icon {
             display: inline-block;
             animation: titleIconFloat 3s ease-in-out infinite;
@@ -2346,6 +2345,7 @@
                         <input type="hidden" name="_subject" value="Weather Site Feedback">
                         <input type="hidden" name="_captcha" value="false">
                         <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_next" value="https://weather-sudo.github.io/amir/?feedback=success">
 
                         <div class="form-row">
                             <div class="form-group" id="group-name">
@@ -3519,7 +3519,6 @@
                 return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
             }
 
-            // ✅ اگه دامنه از قبل توی لیست دامنه‌های معروف هست، مستقیم قبولش کن
             if (COMMON_DOMAINS.includes(lowerDomain)) {
                 return { valid: true, reason: 'ok', suggestion: null };
             }
@@ -3757,7 +3756,6 @@
                 groupEmail.classList.add('has-success');
             }
 
-            // اگه اعتبارسنجی خطا داشت، جلوی ارسال رو بگیر
             if (!nameOk || !emailOk || !messageOk) {
                 e.preventDefault();
                 const firstError = feedbackForm.querySelector('.has-error');
@@ -3765,7 +3763,6 @@
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
-            // اگه همه چیز درست بود، مرورگر خودش فرم رو به روش POST ارسال می‌کنه
         });
 
         let hiddenPausedAt = 0;
@@ -3791,6 +3788,19 @@
             cities = loadCities();
             initThemeFromStorage();
             initFeedbackState();
+
+            // ✅ اگه کاربر از فرم برگشت، پیام موفقیت نشون بده
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('feedback') === 'success') {
+                    window.history.replaceState({}, '', window.location.pathname);
+                    setTimeout(() => {
+                        setFeedbackOpen(true, false);
+                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
+                        setTimeout(hideFormStatus, 6000);
+                    }, 500);
+                }
+            } catch (e) { }
 
             if (getConsent()) {
                 const cacheResult = await cacheGet('weather-data');
