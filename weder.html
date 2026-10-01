@@ -1,0 +1,3852 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Live weather & air quality for Iranian cities">
+    <title>Weather - ԹʍɿՐ ʍԾɧԹʍԹԺ ★</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Counter.dev Analytics -->
+    <script src="https://cdn.counter.dev/script.js" data-id="65fabc75-c670-4df6-a991-ff67c6cac174"
+        data-utcoffset="4"></script>
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-bg-hover: #273449;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #334155;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --aqi-good: #22c55e;
+            --aqi-fair: #a3e635;
+            --aqi-moderate: #eab308;
+            --aqi-poor: #f97316;
+            --aqi-very-poor: #ef4444;
+            --aqi-hazardous: #8b5cf6;
+            --error-red: #ef4444;
+            --success-green: #22c55e;
+            --warning-amber: #f59e0b;
+            --telegram-blue: #229ED9;
+        }
+
+        [data-theme="light"] {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --card-bg-hover: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+            padding: 1rem;
+            padding-top: calc(1rem + env(safe-area-inset-top));
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            padding-left: calc(1rem + env(safe-area-inset-left));
+            padding-right: calc(1rem + env(safe-area-inset-right));
+            position: relative;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            contain: strict;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        .orb-1 {
+            width: 480px;
+            height: 480px;
+            top: -120px;
+            left: -120px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0) 70%);
+            animation: orbFloat1 24s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 560px;
+            height: 560px;
+            bottom: -160px;
+            right: -140px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.18), rgba(139, 92, 246, 0) 70%);
+            animation: orbFloat2 30s ease-in-out infinite;
+        }
+
+        .orb-3 {
+            width: 360px;
+            height: 360px;
+            top: 42%;
+            left: 45%;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0) 70%);
+            animation: orbFloat3 22s ease-in-out infinite;
+        }
+
+        @keyframes orbFloat1 {
+
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(90px, 60px, 0) scale(1.08);
+            }
+        }
+
+        @keyframes orbFloat2 {
+
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(-70px, -90px, 0) scale(1.05);
+            }
+        }
+
+        @keyframes orbFloat3 {
+
+            0%,
+            100% {
+                transform: translate3d(-50%, -50%, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(calc(-50% - 40px), calc(-50% + 55px), 0) scale(1.1);
+            }
+        }
+
+        [data-theme="light"] .orb-1 {
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.12), rgba(56, 189, 248, 0) 70%);
+        }
+
+        [data-theme="light"] .orb-2 {
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.10), rgba(139, 92, 246, 0) 70%);
+        }
+
+        [data-theme="light"] .orb-3 {
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0) 70%);
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner {
+            display: none;
+            border-radius: var(--radius);
+            padding: 0.85rem 1.25rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .banner.visible {
+            display: block;
+        }
+
+        .banner.error {
+            background: #450a0a;
+            color: #fca5a5;
+            border: 1px solid #7f1d1d;
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--radius);
+            padding: 1px;
+            background: linear-gradient(120deg, transparent 30%, rgba(56, 189, 248, 0.4) 50%, transparent 70%);
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: headerGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+                opacity: 0.35;
+            }
+
+            50% {
+                background-position: 100% 50%;
+                opacity: 0.75;
+            }
+        }
+
+        .title {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .title h1 {
+            font-size: clamp(1.05rem, 3vw, 1.5rem);
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ✅ تغییر: از چرخش به حرکت آروم بالا-پایین */
+        .title h1 .title-icon {
+            display: inline-block;
+            animation: titleIconFloat 3s ease-in-out infinite;
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        @keyframes titleIconFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .sub {
+            font-size: clamp(0.7rem, 2.2vw, 0.85rem);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            vertical-align: middle;
+            margin-right: 0.35rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1.5px solid var(--accent);
+            opacity: 0;
+            animation: liveDotRing 2s ease-out infinite;
+        }
+
+        @keyframes liveDotRing {
+            0% {
+                transform: scale(0.6);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .status {
+            font-size: clamp(0.68rem, 2vw, 0.8rem);
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
+            user-select: none;
+            position: relative;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (hover: hover) {
+            .icon-btn:hover {
+                background: #7dd3fc;
+                transform: scale(1.08);
+                box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.12);
+            }
+        }
+
+        .icon-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #refreshBtn {
+            box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.5);
+            animation: refreshBreath 3s ease-in-out infinite;
+        }
+
+        @keyframes refreshBreath {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.45);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(56, 189, 248, 0);
+            }
+        }
+
+        #refreshBtn.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: border-color 0.2s, box-shadow 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 22px -4px rgba(56, 189, 248, 0.35);
+            animation: inputFocusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes inputFocusPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 22px -4px rgba(56, 189, 248, 0.35);
+            }
+
+            50% {
+                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22), 0 0 30px -4px rgba(56, 189, 248, 0.55);
+            }
+        }
+
+        .search-box button {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            padding: 0 1.25rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 48px;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            transition: background 0.2s, opacity 0.2s, transform 0.15s;
+        }
+
+        .search-box button:not(:disabled):hover {
+            background: #7dd3fc;
+            transform: translateY(-1px);
+        }
+
+        .search-box button:not(:disabled):active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .search-box button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+            max-height: 320px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            padding: 0.35rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .suggestions.visible {
+            display: block;
+            animation: suggestionsIn 0.2s ease both;
+        }
+
+        @keyframes suggestionsIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.7rem 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: rgba(56, 189, 248, 0.12);
+            transform: translateX(3px);
+        }
+
+        [data-theme="light"] .suggestion-item:hover,
+        [data-theme="light"] .suggestion-item.active {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        .suggestion-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .suggestion-flag {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .suggestion-name {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .suggestion-admin {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 0.1rem;
+        }
+
+        .suggestion-country {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: rgba(148, 163, 184, 0.15);
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .suggestions-loading,
+        .suggestions-empty {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+            grid-auto-rows: 1fr;
+            gap: 1rem;
+        }
+
+        .weather-disclaimer {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.75rem 1rem;
+            background: rgba(56, 189, 248, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-radius: 12px;
+            font-size: clamp(0.7rem, 1.6vw, 0.82rem);
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-top: 0.25rem;
+            transition: border-color 0.3s;
+        }
+
+        [data-theme="light"] .weather-disclaimer {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.22);
+        }
+
+        .weather-disclaimer .disclaimer-icon {
+            flex-shrink: 0;
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            display: inline-block;
+            animation: disclaimerBlink 4s ease-in-out infinite;
+        }
+
+        @keyframes disclaimerBlink {
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .weather-disclaimer p {
+            margin: 0;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .weather-disclaimer strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: background 0.2s, transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+            animation: fadeIn 0.4s ease both;
+            animation-delay: var(--stagger-delay, 0s);
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+
+        .card:active {
+            transform: scale(0.99);
+        }
+
+        @media (hover: hover) {
+            .card:hover {
+                background: var(--card-bg-hover);
+                transform: translateY(-3px);
+                border-color: rgba(56, 189, 248, 0.35);
+                box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.12);
+            }
+
+            [data-theme="light"] .card:hover {
+                box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(56, 189, 248, 0.18);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(100deg, transparent 20%, rgba(56, 189, 248, 0.10) 50%, transparent 80%);
+            transform: translateX(-110%);
+            transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @media (hover: hover) {
+            .card:hover::before {
+                transform: translateX(110%);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardAddPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.2) rotate(-15deg);
+                filter: brightness(2.2);
+            }
+
+            35% {
+                opacity: 1;
+                transform: scale(1.12) rotate(5deg);
+                filter: brightness(1.4);
+            }
+
+            55% {
+                transform: scale(0.94) rotate(-3deg);
+                filter: brightness(1.1);
+            }
+
+            72% {
+                transform: scale(1.04) rotate(1.5deg);
+                filter: brightness(1);
+            }
+
+            86% {
+                transform: scale(0.98) rotate(-0.5deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes cardAddRipple {
+            0% {
+                box-shadow:
+                    0 0 0 0 rgba(56, 189, 248, 0.75),
+                    0 0 0 0 rgba(56, 189, 248, 0.45),
+                    0 0 0 0 rgba(56, 189, 248, 0.2),
+                    var(--shadow);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 0 12px rgba(56, 189, 248, 0),
+                    0 0 0 22px rgba(56, 189, 248, 0),
+                    0 0 0 32px rgba(56, 189, 248, 0),
+                    var(--shadow);
+            }
+        }
+
+        .card.newly-added {
+            animation:
+                cardAddPop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0s both,
+                cardAddRipple 1.3s ease-out 0.2s;
+            z-index: 10;
+            border-color: var(--accent);
+            will-change: transform, opacity, box-shadow;
+        }
+
+        .card.no-anim {
+            animation: none;
+            animation-delay: 0s;
+        }
+
+        .card.removing {
+            animation: cardRemove 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+            transform-origin: center;
+        }
+
+        @keyframes cardRemove {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: blur(0);
+            }
+
+            35% {
+                opacity: 0.75;
+                transform: scale(1.03) rotate(-0.5deg);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.7) rotate(-2deg);
+                filter: blur(4px);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            padding-right: 2.25rem;
+            min-height: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .city-name {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .weather-icon {
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            line-height: 1;
+            flex-shrink: 0;
+            display: inline-block;
+            transform-origin: center;
+            animation: iconFloat 3.2s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes iconFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-4px) rotate(2deg);
+            }
+        }
+
+        .temp-main {
+            font-size: clamp(2rem, 5vw, 2.6rem);
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.1;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s;
+        }
+
+        .weather-desc {
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            color: var(--text-muted);
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        .remove-city-btn {
+            position: absolute;
+            top: 0.55rem;
+            right: 0.55rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s, transform 0.15s;
+            touch-action: manipulation;
+            padding: 0;
+            line-height: 1;
+            z-index: 3;
+        }
+
+        .card:hover .remove-city-btn {
+            opacity: 1;
+        }
+
+        .remove-city-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .remove-city-btn:active {
+            transform: scale(0.9) rotate(90deg);
+        }
+
+        @media (hover: none) {
+            .remove-city-btn {
+                opacity: 1;
+            }
+        }
+
+        .aqi-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .aqi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            position: relative;
+            animation: aqiPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes aqiPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.08);
+            }
+        }
+
+        .aqi-label {
+            font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+            color: var(--text-muted);
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.4rem 0.75rem;
+            font-size: clamp(0.7rem, 1.6vw, 0.82rem);
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 0.6rem;
+            margin-top: auto;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            min-width: 0;
+            transition: color 0.2s;
+        }
+
+        .detail-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .forecast-row {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 0.35rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            margin-top: 0.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .forecast-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.55rem 0.25rem;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.06);
+            border: 1px solid transparent;
+            transition: background 0.2s, border-color 0.2s, transform 0.25s;
+            min-width: 0;
+            cursor: default;
+        }
+
+        @media (hover: hover) {
+            .forecast-day:hover {
+                background: rgba(56, 189, 248, 0.14);
+                border-color: rgba(56, 189, 248, 0.3);
+                transform: translateY(-3px);
+            }
+
+            .forecast-day:hover .day-icon {
+                transform: scale(1.15);
+            }
+        }
+
+        [data-theme="light"] .forecast-day {
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        [data-theme="light"] .forecast-day:hover {
+            background: rgba(56, 189, 248, 0.16);
+        }
+
+        .forecast-day .day-label {
+            font-size: clamp(0.6rem, 1.4vw, 0.72rem);
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .forecast-day .day-icon {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+            transition: transform 0.25s;
+            display: inline-block;
+        }
+
+        .forecast-day .day-temp {
+            font-size: clamp(0.62rem, 1.4vw, 0.74rem);
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .forecast-day .day-temp .min {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .error-card {
+            border-color: #ef4444;
+        }
+
+        .error-card .temp-main {
+            color: #ef4444;
+            font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+        }
+
+        .retry-btn {
+            align-self: flex-start;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            border-radius: 8px;
+            padding: 0.4rem 0.85rem;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.3rem;
+            transition: background 0.2s, transform 0.15s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .retry-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .retry-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .telegram-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s, border-color 0.2s;
+            min-height: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .telegram-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(34, 158, 217, 0.08), rgba(34, 158, 217, 0));
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+        }
+
+        .telegram-section:hover {
+            background: var(--card-bg-hover);
+            border-color: rgba(34, 158, 217, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .telegram-section:hover::before {
+            opacity: 1;
+        }
+
+        .telegram-section:active {
+            transform: scale(0.99);
+        }
+
+        .telegram-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .telegram-icon {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px -2px rgba(34, 158, 217, 0.5);
+            transition: transform 0.25s, box-shadow 0.25s;
+            position: relative;
+            animation: telegramPulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes telegramPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 3px 10px -2px rgba(34, 158, 217, 0.5), 0 0 0 0 rgba(34, 158, 217, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 3px 10px -2px rgba(34, 158, 217, 0.6), 0 0 0 8px rgba(34, 158, 217, 0);
+            }
+        }
+
+        .telegram-section:hover .telegram-icon {
+            transform: scale(1.08) rotate(-6deg);
+            box-shadow: 0 5px 14px -2px rgba(34, 158, 217, 0.65);
+            animation: none;
+        }
+
+        .telegram-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .telegram-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            min-width: 0;
+        }
+
+        .telegram-title {
+            font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+            font-weight: 700;
+        }
+
+        .telegram-sub {
+            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .telegram-handle {
+            color: var(--telegram-blue);
+            font-weight: 600;
+        }
+
+        .telegram-arrow {
+            font-size: 1.1rem;
+            color: var(--telegram-blue);
+            flex-shrink: 0;
+            transition: transform 0.25s;
+            font-weight: 700;
+        }
+
+        .telegram-section:hover .telegram-arrow {
+            transform: translateX(4px);
+        }
+
+        .feedback {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .feedback-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: inherit;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: background 0.2s;
+            text-align: left;
+            min-height: 60px;
+        }
+
+        .feedback-toggle:hover {
+            background: var(--card-bg-hover);
+        }
+
+        .feedback-toggle:active {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .feedback-toggle-content {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            min-width: 0;
+        }
+
+        .feedback-toggle-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+            flex-shrink: 0;
+            display: inline-block;
+            animation: feedbackIconBounce 4s ease-in-out infinite;
+        }
+
+        @keyframes feedbackIconBounce {
+
+            0%,
+            85%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            90% {
+                transform: translateY(-3px) rotate(-8deg);
+            }
+
+            95% {
+                transform: translateY(0) rotate(8deg);
+            }
+        }
+
+        .feedback-toggle-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            min-width: 0;
+        }
+
+        .feedback-toggle-title {
+            font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+            font-weight: 700;
+        }
+
+        .feedback-toggle-sub {
+            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+            color: var(--text-muted);
+        }
+
+        .feedback-toggle-arrow {
+            font-size: 1rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .feedback.open .feedback-toggle-arrow {
+            transform: rotate(180deg);
+        }
+
+        .feedback-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .feedback.open .feedback-body {
+            max-height: 1200px;
+        }
+
+        .feedback-inner {
+            padding: 1.25rem 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feedback-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            width: 100%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .form-group label {
+            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .email-input-wrapper {
+            position: relative;
+        }
+
+        .email-input-wrapper input {
+            padding-right: 2.75rem;
+        }
+
+        .email-indicator {
+            position: absolute;
+            top: 50%;
+            right: 0.75rem;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            line-height: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .email-indicator.visible {
+            opacity: 1;
+        }
+
+        .email-indicator.valid {
+            color: var(--success-green);
+            animation: emailOkPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .email-indicator.invalid {
+            color: var(--error-red);
+            animation: errorShake 0.3s ease;
+        }
+
+        .email-indicator.checking {
+            color: var(--text-muted);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes emailOkPop {
+            0% {
+                transform: translateY(-50%) scale(0.5);
+            }
+
+            60% {
+                transform: translateY(-50%) scale(1.15);
+            }
+
+            100% {
+                transform: translateY(-50%) scale(1);
+            }
+        }
+
+        .email-validation-message {
+            display: none;
+            font-size: 0.75rem;
+            margin-top: 0.15rem;
+            line-height: 1.4;
+            animation: errorShake 0.3s ease;
+        }
+
+        .email-validation-message.visible {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.35rem;
+        }
+
+        .email-validation-message.valid {
+            color: var(--success-green);
+        }
+
+        .email-validation-message.invalid {
+            color: var(--error-red);
+        }
+
+        .email-validation-message.warning {
+            color: var(--warning-amber);
+        }
+
+        .email-validation-message .msg-icon {
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+
+        .email-validation-message .msg-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .email-validation-message .msg-suggestion {
+            display: inline;
+            background: none;
+            border: none;
+            color: var(--accent);
+            text-decoration: underline;
+            cursor: pointer;
+            font: inherit;
+            padding: 0;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .email-validation-message .msg-suggestion:hover {
+            opacity: 0.8;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error textarea {
+            border-color: var(--error-red);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        .form-group.has-error label {
+            color: var(--error-red);
+        }
+
+        .form-group.has-success input {
+            border-color: var(--success-green);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+        }
+
+        .form-error {
+            display: none;
+            font-size: 0.75rem;
+            color: var(--error-red);
+            margin-top: 0.15rem;
+            line-height: 1.4;
+            animation: errorShake 0.3s ease;
+        }
+
+        .form-group.has-error .form-error {
+            display: block;
+        }
+
+        @keyframes errorShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            75% {
+                transform: translateX(3px);
+            }
+        }
+
+        .form-status {
+            display: none;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-status.visible {
+            display: block;
+        }
+
+        .form-status.success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .form-status.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .submit-btn {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-start;
+            min-height: 48px;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:not(:disabled):hover {
+            background: #7dd3fc;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px -8px rgba(56, 189, 248, 0.6);
+        }
+
+        .submit-btn:not(:disabled):active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem 0.6rem;
+            padding: 0.75rem 0.5rem;
+            line-height: 1.6;
+        }
+
+        .divider {
+            opacity: 0.5;
+        }
+
+        .footer-link {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0;
+            position: relative;
+        }
+
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 100%;
+            height: 1px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s;
+        }
+
+        .footer-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        #countdown {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.15rem;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        #countdown .cd-label {
+            margin-right: 0.3rem;
+            white-space: nowrap;
+        }
+
+        #countdown .cd-digit {
+            position: relative;
+            display: inline-block;
+            width: 0.72em;
+            height: 1.25em;
+            overflow: hidden;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 4px;
+            font-size: 1.1em;
+            line-height: 1.25em;
+            padding: 0;
+        }
+
+        [data-theme="light"] #countdown .cd-digit {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        #countdown .cd-digit>span {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform, opacity;
+        }
+
+        #countdown .cd-digit>span.flipping {
+            animation: digitRoll 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes digitRoll {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            45% {
+                transform: translateY(-105%);
+                opacity: 0;
+            }
+
+            55% {
+                transform: translateY(105%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #countdown .cd-sep {
+            display: inline-block;
+            font-weight: 700;
+            color: var(--accent);
+            opacity: 0.7;
+            padding: 0 0.05rem;
+            line-height: 1;
+            transform: translateY(-1px);
+            animation: sepBlink 2s ease-in-out infinite;
+        }
+
+        @keyframes sepBlink {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.9;
+            }
+        }
+
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -10px 30px -5px rgba(0, 0, 0, 0.4);
+            padding: 1.25rem;
+            padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+            z-index: 9999;
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+            display: none;
+        }
+
+        .cookie-banner.visible {
+            display: block;
+            transform: translateY(0);
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cookie-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            display: inline-block;
+            animation: cookieWiggle 3s ease-in-out infinite;
+        }
+
+        @keyframes cookieWiggle {
+
+            0%,
+            75%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            80% {
+                transform: rotate(-12deg);
+            }
+
+            85% {
+                transform: rotate(12deg);
+            }
+
+            90% {
+                transform: rotate(-8deg);
+            }
+
+            95% {
+                transform: rotate(8deg);
+            }
+        }
+
+        .cookie-text {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .cookie-text strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.95rem;
+        }
+
+        .cookie-text p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .cookie-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .cookie-btn {
+            border: none;
+            padding: 0.7rem 1.25rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 44px;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .cookie-btn:active {
+            transform: scale(0.97);
+        }
+
+        .cookie-btn-accept {
+            background: var(--accent);
+            color: #0f172a;
+        }
+
+        .cookie-btn-accept:hover {
+            background: #7dd3fc;
+        }
+
+        .cookie-btn-reject {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .cookie-btn-reject:hover {
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .cookie-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.78rem;
+        }
+
+        .cookie-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (min-width: 1600px) {
+            .app {
+                max-width: 1700px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 1.25rem;
+            }
+        }
+
+        @media (min-width: 1280px) and (max-width: 1599px) {
+            .cards {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 1.1rem;
+            }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            .cards {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .cards {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.9rem;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 767px) {
+            .cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 600px) {
+            body {
+                padding: 0.75rem;
+                padding-top: calc(0.75rem + env(safe-area-inset-top));
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+            }
+
+            .app {
+                gap: 0.75rem;
+            }
+
+            .header {
+                padding: 0.9rem 1rem;
+            }
+
+            .title h1 {
+                font-size: 1.05rem;
+            }
+
+            .sub {
+                font-size: 0.7rem;
+            }
+
+            .icon-btn {
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
+                font-size: 1.15rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .submit-btn {
+                align-self: stretch;
+                width: 100%;
+            }
+
+            .cookie-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cookie-actions {
+                flex-direction: column;
+            }
+
+            .cookie-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.65rem;
+                padding-top: calc(0.65rem + env(safe-area-inset-top));
+                padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
+            }
+
+            .app {
+                gap: 0.65rem;
+            }
+
+            .header {
+                padding: 0.85rem 0.9rem;
+                gap: 0.5rem;
+            }
+
+            .title h1 {
+                font-size: 1rem;
+            }
+
+            .sub {
+                font-size: 0.68rem;
+            }
+
+            .status {
+                font-size: 0.65rem;
+            }
+
+            .icon-btn {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                font-size: 1.1rem;
+            }
+
+            .card {
+                padding: 1rem;
+                gap: 0.6rem;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .card-header {
+                padding-right: 2rem;
+                min-height: 30px;
+            }
+
+            .remove-city-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 0.85rem;
+                top: 0.45rem;
+                right: 0.45rem;
+            }
+
+            .forecast-day {
+                padding: 0.45rem 0.15rem;
+                border-radius: 10px;
+                gap: 0.2rem;
+            }
+
+            .forecast-day .day-label {
+                font-size: 0.6rem;
+            }
+
+            .forecast-day .day-icon {
+                font-size: 1rem;
+            }
+
+            .forecast-day .day-temp {
+                font-size: 0.6rem;
+            }
+
+            .suggestions {
+                max-height: 220px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0.7rem;
+            }
+
+            .submit-btn {
+                align-self: stretch;
+                width: 100%;
+            }
+
+            .cookie-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.85rem;
+            }
+
+            .cookie-actions {
+                flex-direction: column;
+            }
+
+            .cookie-btn {
+                width: 100%;
+            }
+
+            .feedback-toggle {
+                padding: 0.9rem 1rem;
+                min-height: 56px;
+            }
+
+            .feedback-toggle-title {
+                font-size: 0.95rem;
+            }
+
+            .feedback-toggle-sub {
+                font-size: 0.7rem;
+            }
+
+            .feedback-inner {
+                padding: 1rem 1rem 1.25rem;
+                gap: 0.85rem;
+            }
+
+            .telegram-section {
+                padding: 0.9rem 1rem;
+                min-height: 56px;
+            }
+
+            .telegram-icon {
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+            }
+
+            .telegram-title {
+                font-size: 0.95rem;
+            }
+
+            .telegram-sub {
+                font-size: 0.7rem;
+            }
+
+            .footer {
+                font-size: 0.68rem;
+                gap: 0.4rem 0.5rem;
+            }
+
+            #countdown .cd-digit {
+                width: 0.7em;
+                height: 1.2em;
+                font-size: 1.05em;
+                line-height: 1.2em;
+            }
+
+            .weather-disclaimer {
+                padding: 0.65rem 0.8rem;
+                font-size: 0.7rem;
+                gap: 0.5rem;
+            }
+
+            .weather-disclaimer .disclaimer-icon {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .app {
+                gap: 0.5rem;
+            }
+
+            .header {
+                padding: 0.6rem 0.85rem;
+            }
+
+            .card {
+                padding: 0.75rem;
+            }
+
+            .suggestions {
+                max-height: 60vh;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .ambient-bg {
+                display: none;
+            }
+
+            .weather-icon {
+                animation: none;
+            }
+
+            .title h1 .title-icon {
+                animation: none;
+            }
+
+            #refreshBtn {
+                animation: none;
+            }
+
+            .live-dot::after {
+                display: none;
+            }
+
+            .cookie-icon {
+                animation: none;
+            }
+
+            .feedback-toggle-icon {
+                animation: none;
+            }
+
+            .telegram-icon {
+                animation: none;
+            }
+
+            .header::after {
+                animation: none;
+                opacity: 0;
+            }
+
+            .disclaimer-icon {
+                animation: none;
+            }
+
+            .aqi-badge {
+                animation: none;
+            }
+
+            .cd-sep {
+                animation: none;
+                opacity: 0.7;
+            }
+        }
+
+        body[data-low-battery="true"] .ambient-bg {
+            display: none;
+        }
+
+        body[data-low-battery="true"] .weather-icon {
+            animation: none;
+        }
+
+        body[data-low-battery="true"] .live-dot::after {
+            display: none;
+        }
+
+        body[data-low-battery="true"] .header::after {
+            animation: none;
+            opacity: 0;
+        }
+
+        body[data-low-battery="true"] #refreshBtn {
+            animation: none;
+        }
+
+        body[data-low-battery="true"] .telegram-icon {
+            animation: none;
+        }
+
+        body[data-low-battery="true"] .aqi-badge {
+            animation: none;
+        }
+
+        @media (max-width: 600px) {
+            .ambient-orb {
+                opacity: 0.5;
+            }
+
+            .orb-1 {
+                width: 300px;
+                height: 300px;
+            }
+
+            .orb-2 {
+                width: 340px;
+                height: 340px;
+            }
+
+            .orb-3 {
+                width: 240px;
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-bg" aria-hidden="true">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+    </div>
+
+    <div class="app">
+
+        <div id="errorBanner" class="banner error">
+            ⚠️ <strong>Network Error:</strong> Could not reach weather service. Please check your connection.
+        </div>
+
+        <header class="header">
+            <div class="title">
+                <h1><span class="title-icon" aria-hidden="true">🌤️</span> Weather & Air Quality</h1>
+                <p class="sub">Auto refresh every <span id="intervalLabel">1</span> hour • <span
+                        id="lastUpdate">—</span></p>
+            </div>
+            <div class="actions">
+                <span id="status" class="status">
+                    <span class="live-dot" aria-hidden="true"></span>
+                    <span id="statusText">Loading…</span>
+                </span>
+                <button id="themeBtn" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+                <button id="refreshBtn" class="icon-btn" title="Refresh" aria-label="Refresh">⟳</button>
+            </div>
+        </header>
+
+        <div class="search-wrapper">
+            <div class="search-box">
+                <input type="text" id="citySearch" placeholder="Add a city… (e.g. Tehran, Mashhad, Shiraz)"
+                    autocomplete="off" spellcheck="false">
+                <button id="addCityBtn">Add</button>
+            </div>
+            <div id="suggestions" class="suggestions"></div>
+        </div>
+
+        <main id="cards" class="cards"></main>
+
+        <div class="weather-disclaimer" role="note">
+            <span class="disclaimer-icon" aria-hidden="true">ℹ️</span>
+            <p>
+                <strong>Note:</strong> Weather data shown here is sourced from Open-Meteo and may differ slightly
+                from other providers (like Google or AccuWeather) due to different measurement methods,
+                update intervals, and forecast models. For critical decisions, please cross-check with
+                official meteorological sources.
+            </p>
+        </div>
+
+        <a href="https://t.me/amirmohamad_Ahvaz" target="_blank" rel="noopener noreferrer" class="telegram-section"
+            aria-label="Contact me on Telegram">
+            <span class="telegram-content">
+                <span class="telegram-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="12" fill="#229ED9" />
+                        <path
+                            d="M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3-2.211-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953z"
+                            fill="#fff" />
+                    </svg>
+                </span>
+                <span class="telegram-text">
+                    <span class="telegram-title">Message me on Telegram</span>
+                    <span class="telegram-sub"><span class="telegram-handle">@amirmohamad_Ahvaz</span></span>
+                </span>
+            </span>
+            <span class="telegram-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <section class="feedback" id="feedbackSection">
+            <button class="feedback-toggle" id="feedbackToggle" aria-expanded="false" aria-controls="feedbackBody">
+                <span class="feedback-toggle-content">
+                    <span class="feedback-toggle-icon">💬</span>
+                    <span class="feedback-toggle-text">
+                        <span class="feedback-toggle-title">Send Feedback</span>
+                        <span class="feedback-toggle-sub">Have a suggestion or found a bug?</span>
+                    </span>
+                </span>
+                <span class="feedback-toggle-arrow">▼</span>
+            </button>
+
+            <div class="feedback-body" id="feedbackBody">
+                <div class="feedback-inner">
+                    <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/YOUR_EMAIL@example.com"
+                        method="POST" novalidate>
+                        <input type="hidden" name="_subject" value="Weather Site Feedback">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_template" value="table">
+
+                        <div class="form-row">
+                            <div class="form-group" id="group-name">
+                                <label for="fb-name">Your name</label>
+                                <input type="text" id="fb-name" name="name" placeholder="Your name" autocomplete="name">
+                                <div class="form-error" id="error-name">Please enter your name.</div>
+                            </div>
+                            <div class="form-group" id="group-email">
+                                <label for="fb-email">Your email</label>
+                                <div class="email-input-wrapper">
+                                    <input type="email" id="fb-email" name="email" placeholder="you@example.com"
+                                        autocomplete="email" inputmode="email" spellcheck="false">
+                                    <span class="email-indicator" id="emailIndicator"></span>
+                                </div>
+                                <div class="email-validation-message" id="emailMessage"></div>
+                                <div class="form-error" id="error-email">Please enter a valid email address.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="group-message">
+                            <label for="fb-message">Your message</label>
+                            <textarea id="fb-message" name="message"
+                                placeholder="Write your suggestion or criticism here…"></textarea>
+                            <div class="form-error" id="error-message">Please write your message.</div>
+                        </div>
+
+                        <div class="form-status" id="formStatus"></div>
+
+                        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div id="countdown" class="countdown">
+                <span class="cd-label">Next:</span>
+                <span class="cd-digit" data-digit="h0"><span>0</span></span>
+                <span class="cd-digit" data-digit="h1"><span>0</span></span>
+                <span class="cd-sep">:</span>
+                <span class="cd-digit" data-digit="m0"><span>0</span></span>
+                <span class="cd-digit" data-digit="m1"><span>0</span></span>
+                <span class="cd-sep">:</span>
+                <span class="cd-digit" data-digit="s0"><span>0</span></span>
+                <span class="cd-digit" data-digit="s1"><span>0</span></span>
+            </div>
+            <span class="divider">•</span>
+            <button id="cookieSettingsBtn" class="footer-link">Cookie Settings</button>
+            <span class="divider">•</span>
+            <span>Created by: ԹʍɿՐ ʍԾɧԹʍԹԺ</span>
+        </footer>
+    </div>
+
+    <div id="cookieBanner" class="cookie-banner">
+        <div class="cookie-content">
+            <div class="cookie-icon">🍪</div>
+            <div class="cookie-text">
+                <strong>We use cookies</strong>
+                <p>
+                    We use cookies to remember your theme preference, saved cities, and cached weather data.
+                    Read our <a href="#" id="cookieMoreInfo" class="cookie-link">cookie notice</a>.
+                </p>
+            </div>
+            <div class="cookie-actions">
+                <button id="cookieAccept" class="cookie-btn cookie-btn-accept">Accept all</button>
+                <button id="cookieReject" class="cookie-btn cookie-btn-reject">Reject non-essential</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  DEVICE DETECTION
+        // ============================================================
+        const device = (() => {
+            const ua = navigator.userAgent || '';
+            const width = window.innerWidth;
+            const isTouch = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /Android/i.test(ua);
+            const isMobileUA = /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+            const isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (isAndroid && !/Mobile/i.test(ua));
+
+            let formFactor;
+            if (isTabletUA || (isTouch && width >= 600 && width < 1024)) formFactor = 'tablet';
+            else if (isMobileUA || (isTouch && width < 600)) formFactor = 'mobile';
+            else formFactor = 'desktop';
+
+            return {
+                formFactor,
+                isMobile: formFactor === 'mobile',
+                isTablet: formFactor === 'tablet',
+                isDesktop: formFactor === 'desktop',
+                isTouch, isIOS, isAndroid,
+                width,
+                dpr: window.devicePixelRatio || 1
+            };
+        })();
+
+        document.body.setAttribute('data-device', device.formFactor);
+        document.body.setAttribute('data-touch', device.isTouch ? 'true' : 'false');
+        console.log(`📱 Device: ${device.formFactor} | Touch: ${device.isTouch} | Width: ${device.width}px | DPR: ${device.dpr}`);
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newWidth = window.innerWidth;
+                let newFormFactor;
+                if (device.isTablet && newWidth >= 1024) newFormFactor = 'desktop';
+                else if (device.isMobile && newWidth >= 600 && newWidth < 1024) newFormFactor = 'tablet';
+                else if (device.isMobile || (device.isTouch && newWidth < 600)) newFormFactor = 'mobile';
+                else if (newWidth >= 1024) newFormFactor = 'desktop';
+                else newFormFactor = 'tablet';
+
+                if (newFormFactor !== document.body.getAttribute('data-device')) {
+                    document.body.setAttribute('data-device', newFormFactor);
+                    console.log(`📱 Device changed: ${newFormFactor} (${newWidth}px)`);
+                }
+            }, 250);
+        });
+
+        let isLowBattery = false;
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                function updateBatteryStatus() {
+                    const low = (battery.level <= 0.2 && !battery.charging);
+                    if (low !== isLowBattery) {
+                        isLowBattery = low;
+                        document.body.setAttribute('data-low-battery', low ? 'true' : 'false');
+                        if (low) console.log(`🔋 Low battery mode enabled (${Math.round(battery.level * 100)}%)`);
+                    }
+                }
+                updateBatteryStatus();
+                battery.addEventListener('levelchange', updateBatteryStatus);
+                battery.addEventListener('chargingchange', updateBatteryStatus);
+            }).catch(() => { });
+        }
+
+        const REFRESH_HOURS = device.isMobile ? 2 : 1;
+        const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
+        const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
+        const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+        const FETCH_TIMEOUT_MS = 15000;
+
+        const COOKIE_CONSENT_KEY = 'iran_weather_cookie_consent';
+        const COOKIE_CITIES_KEY = 'iran_weather_cities';
+        const COOKIE_THEME_KEY = 'iran_weather_theme';
+        const COOKIE_CACHE_KEY = 'iran_weather_cache';
+        const COOKIE_FEEDBACK_KEY = 'iran_weather_feedback_open';
+        const COOKIE_DAYS = 365;
+
+        const CACHE_NAME = 'iran-weather-cache-v1';
+        const CACHE_API_PREFIX = 'api-cache:';
+
+        const DEFAULT_CITIES = [
+            { name: 'Tehran', lat: 35.6892, lon: 51.3890 },
+            { name: 'Mashhad', lat: 36.2605, lon: 59.6168 },
+            { name: 'Isfahan', lat: 32.6546, lon: 51.6680 },
+            { name: 'Shiraz', lat: 29.5918, lon: 52.5837 },
+            { name: 'Tabriz', lat: 38.0962, lon: 46.2738 },
+            { name: 'Ahvaz', lat: 31.3167, lon: 48.6844 },
+            { name: 'Ardabil', lat: 38.2494, lon: 48.3014 },
+            { name: 'Sari', lat: 36.5633, lon: 53.0601 },
+            { name: 'Arak', lat: 34.1380, lon: 49.8470 },
+            { name: 'Urmia', lat: 37.5553, lon: 45.0725 },
+            { name: 'Sardasht', lat: 36.1580, lon: 45.4752 },
+            { name: 'Gorgan', lat: 36.8378, lon: 54.4414 },
+            { name: 'Bam', lat: 29.1060, lon: 58.3570 },
+            { name: 'Rasht', lat: 37.2808, lon: 49.5832 },
+            { name: 'Kerman', lat: 30.2839, lon: 57.0834 }
+        ];
+
+        const WMO = {
+            0: { desc: 'Clear sky', icon: '☀️' },
+            1: { desc: 'Mainly clear', icon: '🌤️' },
+            2: { desc: 'Partly cloudy', icon: '⛅' },
+            3: { desc: 'Overcast', icon: '☁️' },
+            45: { desc: 'Fog', icon: '🌁' },
+            48: { desc: 'Rime fog', icon: '🌁' },
+            51: { desc: 'Light drizzle', icon: '🌦️' },
+            53: { desc: 'Moderate drizzle', icon: '🌦️' },
+            55: { desc: 'Dense drizzle', icon: '🌧️' },
+            56: { desc: 'Freezing drizzle', icon: '🌧️' },
+            57: { desc: 'Dense freezing drizzle', icon: '🌧️' },
+            61: { desc: 'Slight rain', icon: '🌧️' },
+            63: { desc: 'Moderate rain', icon: '🌧️' },
+            65: { desc: 'Heavy rain', icon: '🌧️' },
+            66: { desc: 'Freezing rain', icon: '🌧️' },
+            67: { desc: 'Heavy freezing rain', icon: '🌧️' },
+            71: { desc: 'Slight snow', icon: '🌨️' },
+            73: { desc: 'Moderate snow', icon: '🌨️' },
+            75: { desc: 'Heavy snow', icon: '❄️' },
+            77: { desc: 'Snow grains', icon: '🌨️' },
+            80: { desc: 'Rain showers', icon: '🌦️' },
+            81: { desc: 'Moderate rain showers', icon: '🌧️' },
+            82: { desc: 'Violent rain showers', icon: '⛈️' },
+            85: { desc: 'Slight snow showers', icon: '🌨️' },
+            86: { desc: 'Heavy snow showers', icon: '❄️' },
+            95: { desc: 'Thunderstorm', icon: '⛈️' },
+            96: { desc: 'Thunderstorm w/ hail', icon: '⛈️' },
+            99: { desc: 'Thunderstorm w/ heavy hail', icon: '⛈️' }
+        };
+
+        function fetchWithTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
+            return new Promise((resolve, reject) => {
+                const controller = new AbortController();
+                const timer = setTimeout(() => {
+                    controller.abort();
+                    reject(new Error('Request timed out'));
+                }, timeout);
+                fetch(url, { ...options, signal: controller.signal })
+                    .then(res => { clearTimeout(timer); resolve(res); })
+                    .catch(err => { clearTimeout(timer); reject(err); });
+            });
+        }
+
+        const cacheSupported = (() => {
+            try { return typeof caches !== 'undefined' && caches !== null; }
+            catch (e) { return false; }
+        })();
+        console.log(`💾 Cache API supported: ${cacheSupported}`);
+
+        async function cachePut(key, data) {
+            if (!cacheSupported) return;
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                const response = new Response(JSON.stringify(data), {
+                    headers: { 'Content-Type': 'application/json', 'X-Cached-At': String(Date.now()) }
+                });
+                await cache.put(CACHE_API_PREFIX + key, response);
+            } catch (e) { }
+        }
+
+        async function cacheGet(key) {
+            if (!cacheSupported) return null;
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                const response = await cache.match(CACHE_API_PREFIX + key);
+                if (!response) return null;
+                const cachedAt = parseInt(response.headers.get('X-Cached-At') || '0', 10);
+                const data = await response.json();
+                return { data, cachedAt };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function cacheClear() {
+            if (!cacheSupported) return;
+            try {
+                await caches.delete(CACHE_NAME);
+            } catch (e) { }
+        }
+
+        const memoryStore = Object.create(null);
+
+        const cookiesEnabled = (() => {
+            try {
+                const testKey = '__wtest__';
+                document.cookie = testKey + '=1; SameSite=Lax; path=/';
+                const ok = document.cookie.indexOf(testKey) !== -1;
+                document.cookie = testKey + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+                return ok;
+            } catch (e) { return false; }
+        })();
+
+        const localStorageEnabled = (() => {
+            try {
+                const k = '__wtest_ls__';
+                localStorage.setItem(k, '1');
+                const ok = localStorage.getItem(k) === '1';
+                localStorage.removeItem(k);
+                return ok;
+            } catch (e) { return false; }
+        })();
+
+        const sessionStorageEnabled = (() => {
+            try {
+                const k = '__wtest_ss__';
+                sessionStorage.setItem(k, '1');
+                const ok = sessionStorage.getItem(k) === '1';
+                sessionStorage.removeItem(k);
+                return ok;
+            } catch (e) { return false; }
+        })();
+
+        console.log(`🍪 Cookies: ${cookiesEnabled} | 💾 localStorage: ${localStorageEnabled} | 📦 sessionStorage: ${sessionStorageEnabled}`);
+
+        function setCookie(name, value, days = COOKIE_DAYS) {
+            if (!cookiesEnabled) return;
+            try {
+                const expires = new Date(Date.now() + days * 864e5).toUTCString();
+                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+            } catch (e) { }
+        }
+
+        function getCookie(name) {
+            if (!cookiesEnabled) return null;
+            try {
+                const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'));
+                return match ? decodeURIComponent(match[1]) : null;
+            } catch (e) { return null; }
+        }
+
+        function deleteCookie(name) {
+            if (!cookiesEnabled) return;
+            try {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+            } catch (e) { }
+        }
+
+        function storeGet(key) {
+            const c = getCookie(key);
+            if (c !== null && c !== '') return c;
+            if (localStorageEnabled) {
+                try {
+                    const ls = localStorage.getItem(key);
+                    if (ls !== null && ls !== '') return ls;
+                } catch (e) { }
+            }
+            if (sessionStorageEnabled) {
+                try {
+                    const ss = sessionStorage.getItem(key);
+                    if (ss !== null && ss !== '') return ss;
+                } catch (e) { }
+            }
+            if (key in memoryStore) return memoryStore[key];
+            return null;
+        }
+
+        function storeSet(key, value, days = COOKIE_DAYS) {
+            memoryStore[key] = value;
+            setCookie(key, value, days);
+            if (localStorageEnabled) {
+                try { localStorage.setItem(key, value); } catch (e) { }
+            }
+            if (sessionStorageEnabled) {
+                try { sessionStorage.setItem(key, value); } catch (e) { }
+            }
+        }
+
+        function storeDelete(key) {
+            delete memoryStore[key];
+            deleteCookie(key);
+            if (localStorageEnabled) {
+                try { localStorage.removeItem(key); } catch (e) { }
+            }
+            if (sessionStorageEnabled) {
+                try { sessionStorage.removeItem(key); } catch (e) { }
+            }
+        }
+
+        function getConsent() {
+            const raw = storeGet(COOKIE_CONSENT_KEY);
+            if (raw === 'accepted' || raw === 'rejected') return raw;
+            return null;
+        }
+        function setConsent(v) { storeSet(COOKIE_CONSENT_KEY, v, COOKIE_DAYS); }
+        function hasConsent() { return getConsent() === 'accepted'; }
+
+        function showCookieBanner() {
+            const banner = document.getElementById('cookieBanner');
+            banner.style.display = 'block';
+            void banner.offsetHeight;
+            requestAnimationFrame(() => banner.classList.add('visible'));
+        }
+        function hideCookieBanner() {
+            const banner = document.getElementById('cookieBanner');
+            banner.classList.remove('visible');
+            setTimeout(() => { banner.style.display = 'none'; }, 400);
+        }
+        function acceptCookies() {
+            setConsent('accepted');
+            hideCookieBanner();
+            persistAll();
+        }
+        function rejectCookies() {
+            setConsent('rejected');
+            storeDelete(COOKIE_THEME_KEY);
+            storeDelete(COOKIE_CITIES_KEY);
+            storeDelete(COOKIE_CACHE_KEY);
+            hideCookieBanner();
+        }
+        function resetCookieConsent() {
+            storeDelete(COOKIE_CONSENT_KEY);
+            setTimeout(showCookieBanner, 100);
+        }
+
+        let cities = [...DEFAULT_CITIES];
+        let weatherCache = null;
+
+        let isFirstLoad = true;
+        let lastAddedCityName = null;
+
+        function loadCities() {
+            if (!hasConsent()) return [...DEFAULT_CITIES];
+            try {
+                const raw = storeGet(COOKIE_CITIES_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) { }
+            return [...DEFAULT_CITIES];
+        }
+        function saveCities() {
+            if (!hasConsent()) return;
+            try { storeSet(COOKIE_CITIES_KEY, JSON.stringify(cities), COOKIE_DAYS); } catch (e) { }
+        }
+
+        function loadWeatherCacheFromStorage() {
+            if (!hasConsent()) return null;
+            try {
+                const raw = storeGet(COOKIE_CACHE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return (parsed && parsed.data) ? parsed : null;
+            } catch (e) { return null; }
+        }
+
+        function saveWeatherCacheToStorage(results) {
+            if (!hasConsent()) return;
+            try {
+                const compact = results.map(r => ({
+                    city: r.city,
+                    aqi: r.aqi,
+                    current: r.weather?.current ? {
+                        temperature_2m: r.weather.current.temperature_2m,
+                        apparent_temperature: r.weather.current.apparent_temperature,
+                        relative_humidity_2m: r.weather.current.relative_humidity_2m,
+                        weather_code: r.weather.current.weather_code,
+                        wind_speed_10m: r.weather.current.wind_speed_10m,
+                        wind_direction_10m: r.weather.current.wind_direction_10m,
+                        pressure_msl: r.weather.current.pressure_msl,
+                        visibility: r.weather.current.visibility,
+                        dew_point_2m: r.weather.current.dew_point_2m,
+                        uv_index: r.weather.current.uv_index
+                    } : null,
+                    daily: r.weather?.daily ? {
+                        time: r.weather.daily.time,
+                        weather_code: r.weather.daily.weather_code,
+                        temperature_2m_max: r.weather.daily.temperature_2m_max,
+                        temperature_2m_min: r.weather.daily.temperature_2m_min,
+                        precipitation_probability_max: r.weather.daily.precipitation_probability_max,
+                        sunrise: r.weather.daily.sunrise,
+                        sunset: r.weather.daily.sunset
+                    } : null
+                }));
+                storeSet(COOKIE_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: compact }), 1);
+            } catch (e) { }
+        }
+
+        function persistAll() {
+            saveCities();
+            if (weatherCache) {
+                saveWeatherCacheToStorage(weatherCache);
+                cachePut('weather-data', weatherCache).catch(() => { });
+            }
+        }
+
+        function initThemeFromStorage() {
+            const saved = hasConsent() ? storeGet(COOKIE_THEME_KEY) : null;
+            let theme = saved;
+            if (!theme) {
+                const systemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+                theme = systemLight ? 'light' : 'dark';
+            }
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeBtn.textContent = '☀️';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeBtn.textContent = '🌙';
+            }
+        }
+        function saveTheme(theme) {
+            if (!hasConsent()) return;
+            storeSet(COOKIE_THEME_KEY, theme, COOKIE_DAYS);
+        }
+
+        const $ = id => document.getElementById(id);
+        const cardsEl = $('cards');
+        const statusEl = $('status');
+        const statusTextEl = $('statusText');
+        const refreshBtn = $('refreshBtn');
+        const themeBtn = $('themeBtn');
+        const lastUpdateEl = $('lastUpdate');
+        const countdownEl = $('countdown');
+        const intervalLabel = $('intervalLabel');
+        const errorBanner = $('errorBanner');
+        const searchInput = $('citySearch');
+        const addCityBtn = $('addCityBtn');
+        const suggestionsEl = $('suggestions');
+
+        function setStatus(text) {
+            if (statusTextEl) {
+                statusTextEl.textContent = text;
+            } else {
+                statusEl.textContent = text;
+            }
+        }
+
+        const countdownDigitEls = {
+            h0: document.querySelector('[data-digit="h0"] > span'),
+            h1: document.querySelector('[data-digit="h1"] > span'),
+            m0: document.querySelector('[data-digit="m0"] > span'),
+            m1: document.querySelector('[data-digit="m1"] > span'),
+            s0: document.querySelector('[data-digit="s0"] > span'),
+            s1: document.querySelector('[data-digit="s1"] > span')
+        };
+        const digitTimers = {};
+
+        function setDigit(key, value, animate = true) {
+            const el = countdownDigitEls[key];
+            if (!el) return;
+            if (el.textContent === value) return;
+
+            if (!animate) {
+                el.textContent = value;
+                el.classList.remove('flipping');
+                return;
+            }
+
+            if (digitTimers[key]) clearTimeout(digitTimers[key]);
+
+            el.classList.remove('flipping');
+            void el.offsetWidth;
+            el.classList.add('flipping');
+
+            digitTimers[key] = setTimeout(() => {
+                el.textContent = value;
+            }, 180);
+
+            el.addEventListener('animationend', () => {
+                el.classList.remove('flipping');
+            }, { once: true });
+        }
+
+        function updateCountdownDisplay(h, m, s, animate = true) {
+            const hStr = String(h).padStart(2, '0');
+            const mStr = String(m).padStart(2, '0');
+            const sStr = String(s).padStart(2, '0');
+            setDigit('h0', hStr[0], animate);
+            setDigit('h1', hStr[1], animate);
+            setDigit('m0', mStr[0], animate);
+            setDigit('m1', mStr[1], animate);
+            setDigit('s0', sStr[0], animate);
+            setDigit('s1', sStr[1], animate);
+        }
+
+        let countdownTimer = null;
+        let isFetching = false;
+        let suggestDebounce = null;
+        let suggestAbort = null;
+        let activeSuggestionIndex = -1;
+        let currentSuggestions = [];
+
+        themeBtn.addEventListener('click', () => {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                themeBtn.textContent = '🌙';
+                saveTheme('dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeBtn.textContent = '☀️';
+                saveTheme('light');
+            }
+        });
+
+        function flagEmoji(code) {
+            if (!code || code.length !== 2) return '🌍';
+            try {
+                return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+            } catch (e) { return '🌍'; }
+        }
+        function getAQICat(aqi) {
+            if (aqi <= 20) return { label: 'Good', color: 'var(--aqi-good)', icon: '🟢' };
+            if (aqi <= 40) return { label: 'Fair', color: 'var(--aqi-fair)', icon: '🟡' };
+            if (aqi <= 60) return { label: 'Moderate', color: 'var(--aqi-moderate)', icon: '🟠' };
+            if (aqi <= 80) return { label: 'Poor', color: 'var(--aqi-poor)', icon: '🔴' };
+            if (aqi <= 100) return { label: 'Very Poor', color: 'var(--aqi-very-poor)', icon: '🟣' };
+            return { label: 'Hazardous', color: 'var(--aqi-hazardous)', icon: '⚫' };
+        }
+        function fmtTime(isoString) {
+            try { return new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }); }
+            catch (e) { return '—'; }
+        }
+        function fmtDay(isoDate) {
+            try { return new Date(isoDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }); }
+            catch (e) { return '—'; }
+        }
+
+        async function fetchSuggestions(query) {
+            if (suggestAbort) suggestAbort.abort();
+            suggestAbort = new AbortController();
+            const url = `${GEO_API}?name=${encodeURIComponent(query)}&count=8&language=en&format=json`;
+            const res = await fetch(url, { signal: suggestAbort.signal });
+            if (!res.ok) throw new Error('Geocoding failed');
+            const data = await res.json();
+            return data.results || [];
+        }
+
+        function renderSuggestions(results, query) {
+            currentSuggestions = results;
+            activeSuggestionIndex = -1;
+            suggestionsEl.innerHTML = '';
+            if (!results || results.length === 0) {
+                suggestionsEl.innerHTML = `<div class="suggestions-empty">No cities found for "${query}"</div>`;
+                suggestionsEl.classList.add('visible');
+                return;
+            }
+            results.forEach((r, index) => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.dataset.index = index;
+                const admin = r.admin1 || r.admin2 || '';
+                const country = r.country || '';
+                item.innerHTML = `
+          <div class="suggestion-left">
+            <span class="suggestion-flag">${flagEmoji(r.country_code)}</span>
+            <div style="min-width:0;flex:1;">
+              <div class="suggestion-name">${r.name}</div>
+              ${admin ? `<div class="suggestion-admin">${admin}</div>` : ''}
+            </div>
+          </div>
+          ${country ? `<span class="suggestion-country">${country}</span>` : ''}
+        `;
+                item.addEventListener('mousedown', (e) => { e.preventDefault(); selectSuggestion(index); });
+                item.addEventListener('touchstart', (e) => { e.preventDefault(); selectSuggestion(index); }, { passive: false });
+                suggestionsEl.appendChild(item);
+            });
+            suggestionsEl.classList.add('visible');
+        }
+
+        function hideSuggestions() {
+            suggestionsEl.classList.remove('visible');
+            suggestionsEl.innerHTML = '';
+            activeSuggestionIndex = -1;
+            currentSuggestions = [];
+        }
+
+        function updateActiveSuggestion() {
+            const items = suggestionsEl.querySelectorAll('.suggestion-item');
+            items.forEach((el, i) => el.classList.toggle('active', i === activeSuggestionIndex));
+            if (activeSuggestionIndex >= 0 && items[activeSuggestionIndex]) {
+                items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        async function selectSuggestion(index) {
+            const r = currentSuggestions[index];
+            if (!r) return;
+            hideSuggestions();
+            searchInput.value = '';
+            if (cities.some(c => c.name.toLowerCase() === r.name.toLowerCase() && Math.abs(c.lat - r.latitude) < 0.01)) {
+                await updateAll();
+                return;
+            }
+            lastAddedCityName = r.name;
+            cities.push({ name: r.name, lat: r.latitude, lon: r.longitude });
+            saveCities();
+            await updateAll();
+        }
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim();
+            clearTimeout(suggestDebounce);
+            if (q.length < 2) { hideSuggestions(); return; }
+            const debounceMs = device.isMobile ? 400 : 250;
+            suggestDebounce = setTimeout(async () => {
+                suggestionsEl.innerHTML = '<div class="suggestions-loading">Searching…</div>';
+                suggestionsEl.classList.add('visible');
+                try {
+                    const results = await fetchSuggestions(q);
+                    if (searchInput.value.trim() === q) renderSuggestions(results, q);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        suggestionsEl.innerHTML = '<div class="suggestions-empty">Search failed. Try again.</div>';
+                    }
+                }
+            }, debounceMs);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            const isOpen = suggestionsEl.classList.contains('visible');
+            if (e.key === 'ArrowDown') {
+                if (!isOpen && currentSuggestions.length > 0) suggestionsEl.classList.add('visible');
+                e.preventDefault();
+                if (currentSuggestions.length > 0) {
+                    activeSuggestionIndex = (activeSuggestionIndex + 1) % currentSuggestions.length;
+                    updateActiveSuggestion();
+                }
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentSuggestions.length > 0) {
+                    activeSuggestionIndex = (activeSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+                    updateActiveSuggestion();
+                }
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (isOpen && activeSuggestionIndex >= 0 && currentSuggestions[activeSuggestionIndex]) {
+                    selectSuggestion(activeSuggestionIndex);
+                } else if (isOpen && currentSuggestions.length > 0) {
+                    selectSuggestion(0);
+                } else {
+                    addCity();
+                }
+                return;
+            }
+            if (e.key === 'Escape') { hideSuggestions(); return; }
+        });
+
+        searchInput.addEventListener('blur', () => { setTimeout(hideSuggestions, 150); });
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) hideSuggestions();
+        });
+
+        async function geocodeCity(name) {
+            const url = `${GEO_API}?name=${encodeURIComponent(name)}&count=1&language=en&format=json`;
+            const res = await fetchWithTimeout(url, {}, 8000);
+            if (!res.ok) throw new Error('Geocoding failed');
+            const data = await res.json();
+            if (!data.results || data.results.length === 0) throw new Error('City not found');
+            const r = data.results[0];
+            return { name: r.name, lat: r.latitude, lon: r.longitude, country: r.country_code };
+        }
+
+        async function fetchAllCitiesData(citiesList) {
+            if (!citiesList || citiesList.length === 0) return [];
+
+            const latParam = citiesList.map(c => c.lat).join(',');
+            const lonParam = citiesList.map(c => c.lon).join(',');
+
+            const weatherParams = [
+                'current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dew_point_2m',
+                'daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
+                'timezone=auto',
+                'forecast_days=7'
+            ].join('&');
+
+            const weatherUrl = `${WEATHER_API}?latitude=${latParam}&longitude=${lonParam}&${weatherParams}`;
+            const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
+
+            const [weatherRes, aqiRes] = await Promise.allSettled([
+                fetchWithTimeout(weatherUrl),
+                fetchWithTimeout(aqiUrl)
+            ]);
+
+            let weatherArr = [];
+            let weatherOk = false;
+            if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
+                try {
+                    const json = await weatherRes.value.json();
+                    weatherArr = Array.isArray(json) ? json : [json];
+                    weatherOk = true;
+                } catch (e) { console.error('Weather parse failed:', e); }
+            } else {
+                console.error('Weather batch request failed:', weatherRes.reason);
+            }
+
+            let aqiArr = [];
+            if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
+                try {
+                    const json = await aqiRes.value.json();
+                    aqiArr = Array.isArray(json) ? json : [json];
+                } catch (e) { console.error('AQI parse failed:', e); }
+            }
+
+            const results = citiesList.map((city, i) => ({
+                city,
+                weather: weatherArr[i] || null,
+                aqi: aqiArr[i]?.current?.european_aqi ?? null
+            }));
+
+            if (weatherOk) {
+                cachePut('weather-data', results).catch(() => { });
+            }
+
+            return results;
+        }
+
+        function createCard(item) {
+            const { city, weather, aqi } = item;
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-city-btn';
+            removeBtn.title = `Remove ${city.name}`;
+            removeBtn.setAttribute('aria-label', `Remove ${city.name}`);
+            removeBtn.textContent = '×';
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeCity(city.name, card);
+            });
+            card.appendChild(removeBtn);
+
+            if (!weather || !weather.current) {
+                card.classList.add('error-card');
+                const inner = document.createElement('div');
+                inner.innerHTML = `
+          <div class="card-header">
+            <span class="city-name">${city.name}</span>
+            <span class="weather-icon">⚠️</span>
+          </div>
+          <div class="temp-main">No data</div>
+          <div class="weather-desc">Fetch failed</div>
+          <button class="retry-btn">Retry</button>
+        `;
+                inner.querySelector('.retry-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    updateAll();
+                });
+                card.appendChild(inner);
+                return card;
+            }
+
+            const c = weather.current;
+            const d = weather.daily;
+            const info = WMO[c.weather_code] || { desc: 'Unknown', icon: '❓' };
+            const temp = Math.round(c.temperature_2m);
+            const feels = Math.round(c.apparent_temperature);
+            const humidity = c.relative_humidity_2m;
+            const wind = c.wind_speed_10m;
+            const pressure = Math.round(c.pressure_msl);
+            const visibility = c.visibility != null ? (c.visibility / 1000).toFixed(1) : '—';
+            const dew = c.dew_point_2m != null ? Math.round(c.dew_point_2m) : '—';
+            const uv = c.uv_index != null ? c.uv_index.toFixed(1) : '—';
+            const precipProb = d.precipitation_probability_max?.[0] ?? '—';
+            const sunrise = d.sunrise?.[0] ? fmtTime(d.sunrise[0]) : '—';
+            const sunset = d.sunset?.[0] ? fmtTime(d.sunset[0]) : '—';
+
+            let aqiHTML = '';
+            if (aqi != null) {
+                const cat = getAQICat(aqi);
+                aqiHTML = `<div class="aqi-row">
+          <span class="aqi-badge" style="background:${cat.color}">${cat.icon} AQI ${aqi}</span>
+          <span class="aqi-label">${cat.label}</span>
+        </div>`;
+            }
+
+            let forecastHTML = '';
+            if (d && d.time && d.time.length > 1) {
+                forecastHTML = '<div class="forecast-row">';
+                for (let i = 1; i < Math.min(d.time.length, 7); i++) {
+                    const dayInfo = WMO[d.weather_code[i]] || { icon: '❓' };
+                    const dayName = fmtDay(d.time[i]);
+                    const maxT = Math.round(d.temperature_2m_max[i]);
+                    const minT = Math.round(d.temperature_2m_min[i]);
+                    forecastHTML += `
+            <div class="forecast-day">
+              <span class="day-label">${dayName}</span>
+              <span class="day-icon">${dayInfo.icon}</span>
+              <span class="day-temp">${maxT}°<span class="min">/${minT}°</span></span>
+            </div>`;
+                }
+                forecastHTML += '</div>';
+            }
+
+            const inner = document.createElement('div');
+            inner.innerHTML = `
+        <div class="card-header">
+          <span class="city-name">${city.name}</span>
+          <span class="weather-icon">${info.icon}</span>
+        </div>
+        <div class="temp-main">${temp}°C</div>
+        <div class="weather-desc">${info.desc}</div>
+        ${aqiHTML}
+        <div class="details">
+          <span class="detail-item">💧 ${humidity}%</span>
+          <span class="detail-item">🌡️ ${feels}°</span>
+          <span class="detail-item">💨 ${wind} km/h</span>
+          <span class="detail-item">🧭 ${c.wind_direction_10m ?? '—'}°</span>
+          <span class="detail-item">🔽 ${pressure} hPa</span>
+          <span class="detail-item">👁️ ${visibility} km</span>
+          <span class="detail-item">💧 ${dew}° dew</span>
+          <span class="detail-item">☀️ UV ${uv}</span>
+          <span class="detail-item">🌧️ ${precipProb}%</span>
+          <span class="detail-item">🌅 ${sunrise}</span>
+          <span class="detail-item">🌇 ${sunset}</span>
+        </div>
+        ${forecastHTML}
+      `;
+            card.appendChild(inner);
+            return card;
+        }
+
+        function removeCity(name, cardEl) {
+            cities = cities.filter(c => c.name !== name);
+            saveCities();
+            if (!cardEl) return;
+            cardEl.classList.add('removing');
+            let removed = false;
+            const doRemove = () => {
+                if (removed) return;
+                removed = true;
+                cardEl.remove();
+            };
+            cardEl.addEventListener('animationend', doRemove, { once: true });
+            setTimeout(doRemove, 500);
+        }
+
+        async function updateAll() {
+            if (isFetching) return;
+            isFetching = true;
+
+            setStatus('Refreshing…');
+            refreshBtn.classList.add('spinning');
+            errorBanner.classList.remove('visible');
+
+            try {
+                const validResults = await fetchAllCitiesData(cities);
+
+                const anySuccess = validResults.some(r => r.weather && r.weather.current);
+
+                if (anySuccess) {
+                    weatherCache = validResults;
+                    saveWeatherCacheToStorage(validResults);
+                    renderCards(validResults);
+                    errorBanner.classList.remove('visible');
+                    lastUpdateEl.textContent = `Last: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+                    setStatus('Updated ✅');
+                } else {
+                    let usedCache = false;
+                    let cachedData = null;
+                    let cacheSource = '';
+
+                    const cacheResult = await cacheGet('weather-data');
+                    if (cacheResult && cacheResult.data) {
+                        cachedData = cacheResult.data;
+                        cacheSource = 'Cache API';
+                        usedCache = true;
+                    } else {
+                        const storageCache = loadWeatherCacheFromStorage();
+                        if (storageCache && storageCache.data) {
+                            cachedData = storageCache.data;
+                            cacheSource = 'localStorage';
+                            usedCache = true;
+                        }
+                    }
+
+                    if (usedCache && cachedData) {
+                        console.log(`📦 Using cached data from ${cacheSource}`);
+                        renderCards(cachedData);
+                        errorBanner.classList.remove('visible');
+                        lastUpdateEl.textContent = `Cached: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+                        setStatus('Offline 📦');
+                    } else {
+                        renderCards(validResults);
+                        errorBanner.classList.add('visible');
+                        setStatus('Failed ❌');
+                        lastUpdateEl.textContent = '—';
+                    }
+                }
+                startCountdown();
+            } catch (err) {
+                console.error('Update error:', err);
+                errorBanner.classList.add('visible');
+                setStatus('Failed ❌');
+            } finally {
+                isFetching = false;
+                refreshBtn.classList.remove('spinning');
+            }
+        }
+
+        function renderCards(results) {
+            cardsEl.innerHTML = '';
+            results.forEach((item, index) => {
+                const card = createCard(item);
+
+                if (isFirstLoad) {
+                    card.style.setProperty('--stagger-delay', (index * 0.06) + 's');
+                } else if (lastAddedCityName && item.city.name === lastAddedCityName) {
+                    card.classList.add('newly-added');
+                    setTimeout(() => card.classList.remove('newly-added'), 1600);
+                } else {
+                    card.classList.add('no-anim');
+                }
+
+                cardsEl.appendChild(card);
+            });
+
+            isFirstLoad = false;
+            lastAddedCityName = null;
+        }
+
+        function startCountdown() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            const nextUpdate = Date.now() + REFRESH_HOURS * 3600 * 1000;
+
+            const initRemaining = nextUpdate - Date.now();
+            const initH = Math.floor(initRemaining / 3600000);
+            const initM = Math.floor((initRemaining % 3600000) / 60000);
+            const initS = Math.floor((initRemaining % 60000) / 1000);
+            updateCountdownDisplay(initH, initM, initS, false);
+
+            countdownTimer = setInterval(() => {
+                const remaining = nextUpdate - Date.now();
+                if (remaining <= 0) {
+                    clearInterval(countdownTimer);
+                    updateAll();
+                    return;
+                }
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                updateCountdownDisplay(h, m, s, true);
+            }, 1000);
+        }
+
+        async function addCity() {
+            const name = searchInput.value.trim();
+            if (!name) return;
+            hideSuggestions();
+            addCityBtn.disabled = true;
+            addCityBtn.textContent = '…';
+            try {
+                const geo = await geocodeCity(name);
+                if (cities.some(c => c.name.toLowerCase() === geo.name.toLowerCase())) {
+                    searchInput.value = '';
+                    return;
+                }
+                lastAddedCityName = geo.name;
+                cities.push({ name: geo.name, lat: geo.lat, lon: geo.lon });
+                saveCities();
+                searchInput.value = '';
+                await updateAll();
+            } catch (err) {
+                alert('City not found. Please try a different name.');
+            } finally {
+                addCityBtn.disabled = false;
+                addCityBtn.textContent = 'Add';
+            }
+        }
+
+        addCityBtn.addEventListener('click', addCity);
+
+        document.getElementById('cookieAccept').addEventListener('click', acceptCookies);
+        document.getElementById('cookieReject').addEventListener('click', rejectCookies);
+        document.getElementById('cookieSettingsBtn').addEventListener('click', resetCookieConsent);
+        document.getElementById('cookieMoreInfo').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert(
+                'Cookie Notice\n\n' +
+                'We use the following cookies:\n\n' +
+                '• iran_weather_cookie_consent — stores your cookie choice\n' +
+                '• iran_weather_theme — remembers light/dark mode\n' +
+                '• iran_weather_cities — saves your selected cities\n' +
+                '• iran_weather_cache — caches weather data for offline use\n' +
+                '• iran_weather_feedback_open — remembers feedback section state\n\n' +
+                'All data stays in your browser. We do not track you.'
+            );
+        });
+
+        const feedbackSection = document.getElementById('feedbackSection');
+        const feedbackToggle = document.getElementById('feedbackToggle');
+
+        function setFeedbackOpen(open, save = true) {
+            if (open) {
+                feedbackSection.classList.add('open');
+                feedbackToggle.setAttribute('aria-expanded', 'true');
+            } else {
+                feedbackSection.classList.remove('open');
+                feedbackToggle.setAttribute('aria-expanded', 'false');
+            }
+            if (save && hasConsent()) {
+                storeSet(COOKIE_FEEDBACK_KEY, open ? '1' : '0', COOKIE_DAYS);
+            }
+        }
+
+        feedbackToggle.addEventListener('click', () => {
+            const isOpen = feedbackSection.classList.contains('open');
+            setFeedbackOpen(!isOpen);
+        });
+
+        function initFeedbackState() {
+            const saved = hasConsent() ? storeGet(COOKIE_FEEDBACK_KEY) : null;
+            if (saved === '1') {
+                setFeedbackOpen(true, false);
+            } else {
+                setFeedbackOpen(false, false);
+            }
+        }
+
+        const feedbackForm = document.getElementById('feedbackForm');
+        const fbName = document.getElementById('fb-name');
+        const fbEmail = document.getElementById('fb-email');
+        const fbMessage = document.getElementById('fb-message');
+        const groupName = document.getElementById('group-name');
+        const groupEmail = document.getElementById('group-email');
+        const groupMessage = document.getElementById('group-message');
+        const formStatus = document.getElementById('formStatus');
+        const submitBtn = document.getElementById('submitBtn');
+        const emailIndicator = document.getElementById('emailIndicator');
+        const emailMessage = document.getElementById('emailMessage');
+
+        const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+        const COMMON_DOMAINS = [
+            'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com',
+            'icloud.com', 'aol.com', 'protonmail.com', 'proton.me', 'zoho.com',
+            'mail.com', 'gmx.com', 'yandex.com', 'msn.com'
+        ];
+
+        const TYPO_MAP = {
+            'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmil.com': 'gmail.com',
+            'gmaill.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.cm': 'gmail.com',
+            'gmail.con': 'gmail.com', 'gmal.com': 'gmail.com', 'gamil.com': 'gmail.com',
+            'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.co': 'yahoo.com',
+            'hotmial.com': 'hotmail.com', 'hotmai.com': 'hotmail.com', 'hotmal.com': 'hotmail.com',
+            'outlok.com': 'outlook.com', 'outloo.com': 'outlook.com', 'outlook.co': 'outlook.com',
+            'iclod.com': 'icloud.com', 'icloud.co': 'icloud.com', 'iclou.com': 'icloud.com',
+            'protonmai.com': 'protonmail.com', 'protonmal.com': 'protonmail.com'
+        };
+
+        function setEmailIndicator(state) {
+            emailIndicator.className = 'email-indicator';
+            emailIndicator.textContent = '';
+            if (state === 'valid') {
+                emailIndicator.classList.add('visible', 'valid');
+                emailIndicator.textContent = '✓';
+            } else if (state === 'invalid') {
+                emailIndicator.classList.add('visible', 'invalid');
+                emailIndicator.textContent = '✕';
+            } else if (state === 'checking') {
+                emailIndicator.classList.add('visible', 'checking');
+                emailIndicator.textContent = '⟳';
+            }
+        }
+
+        function showEmailMessage(type, html) {
+            emailMessage.className = `email-validation-message visible ${type}`;
+            emailMessage.innerHTML = html;
+        }
+
+        function hideEmailMessage() {
+            emailMessage.className = 'email-validation-message';
+            emailMessage.innerHTML = '';
+        }
+
+        function validateEmailFull(email) {
+            const value = email.trim();
+            if (!value) return { valid: false, reason: 'empty', suggestion: null };
+
+            const atCount = (value.match(/@/g) || []).length;
+            if (atCount === 0) return { valid: false, reason: 'no-at', suggestion: null };
+            if (atCount > 1) return { valid: false, reason: 'multiple-at', suggestion: null };
+
+            const [local, domain] = value.split('@');
+
+            if (!local) return { valid: false, reason: 'no-local', suggestion: null };
+            if (!domain) return { valid: false, reason: 'no-domain', suggestion: null };
+            if (!domain.includes('.')) return { valid: false, reason: 'no-dot', suggestion: null };
+            if (/\s/.test(value)) return { valid: false, reason: 'spaces', suggestion: null };
+            if (/\.\./.test(value)) return { valid: false, reason: 'consecutive-dots', suggestion: null };
+            if (local.startsWith('.') || local.endsWith('.')) return { valid: false, reason: 'dot-position', suggestion: null };
+            if (!EMAIL_REGEX.test(value)) return { valid: false, reason: 'format', suggestion: null };
+
+            const domainParts = domain.toLowerCase().split('.');
+            const tld = domainParts[domainParts.length - 1];
+            if (!/^[a-z]{2,}$/.test(tld)) return { valid: false, reason: 'tld', suggestion: null };
+
+            const lowerDomain = domain.toLowerCase();
+            if (TYPO_MAP[lowerDomain]) {
+                return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
+            }
+
+            for (const common of COMMON_DOMAINS) {
+                if (lowerDomain !== common) {
+                    const distance = levenshtein(lowerDomain, common);
+                    if (distance === 1 || (distance === 2 && lowerDomain.length > 6)) {
+                        return { valid: false, reason: 'typo', suggestion: `${local}@${common}` };
+                    }
+                }
+            }
+
+            return { valid: true, reason: 'ok', suggestion: null };
+        }
+
+        function levenshtein(a, b) {
+            if (a === b) return 0;
+            if (!a.length) return b.length;
+            if (!b.length) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        let emailValidateTimer = null;
+
+        function runLiveEmailValidation() {
+            const value = fbEmail.value;
+
+            if (!value) {
+                clearError(groupEmail);
+                groupEmail.classList.remove('has-success');
+                setEmailIndicator('none');
+                hideEmailMessage();
+                return;
+            }
+
+            setEmailIndicator('checking');
+            clearTimeout(emailValidateTimer);
+
+            emailValidateTimer = setTimeout(() => {
+                const result = validateEmailFull(value);
+
+                if (result.valid) {
+                    clearError(groupEmail);
+                    groupEmail.classList.add('has-success');
+                    setEmailIndicator('valid');
+                    showEmailMessage('valid', '<span class="msg-icon">✓</span><span class="msg-text">Email looks good</span>');
+                } else {
+                    showError(groupEmail);
+                    groupEmail.classList.remove('has-success');
+                    setEmailIndicator('invalid');
+
+                    let message = 'Invalid email address.';
+                    if (result.reason === 'empty') message = 'Please enter your email address.';
+                    else if (result.reason === 'no-at') message = 'Missing "@" symbol.';
+                    else if (result.reason === 'multiple-at') message = 'Only one "@" is allowed.';
+                    else if (result.reason === 'no-local') message = 'Missing username before "@".';
+                    else if (result.reason === 'no-domain') message = 'Missing domain after "@".';
+                    else if (result.reason === 'no-dot') message = 'Domain is missing a dot (e.g. .com).';
+                    else if (result.reason === 'spaces') message = 'Email cannot contain spaces.';
+                    else if (result.reason === 'consecutive-dots') message = 'Email cannot contain "..".';
+                    else if (result.reason === 'dot-position') message = 'Email cannot start or end with a dot.';
+                    else if (result.reason === 'tld') message = 'Domain extension is invalid.';
+                    else if (result.reason === 'format') message = 'Email format is not valid.';
+
+                    if (result.suggestion) {
+                        const suggestion = result.suggestion;
+                        emailMessage.className = 'email-validation-message visible warning';
+                        emailMessage.innerHTML = `
+              <span class="msg-icon">⚠</span>
+              <span class="msg-text">
+                Did you mean
+                <button type="button" class="msg-suggestion" id="emailSuggestionBtn">${suggestion}</button>?
+              </span>
+            `;
+                        setTimeout(() => {
+                            const btn = document.getElementById('emailSuggestionBtn');
+                            if (btn) {
+                                btn.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    fbEmail.value = suggestion;
+                                    fbEmail.focus();
+                                    runLiveEmailValidation();
+                                });
+                            }
+                        }, 0);
+                    } else {
+                        showEmailMessage('invalid',
+                            `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
+                    }
+                }
+            }, 250);
+        }
+
+        fbEmail.addEventListener('input', runLiveEmailValidation);
+        fbEmail.addEventListener('paste', () => setTimeout(runLiveEmailValidation, 0));
+
+        fbEmail.addEventListener('blur', () => {
+            clearTimeout(emailValidateTimer);
+            const value = fbEmail.value.trim();
+            if (!value) {
+                clearError(groupEmail);
+                groupEmail.classList.remove('has-success');
+                setEmailIndicator('none');
+                hideEmailMessage();
+                return;
+            }
+            const result = validateEmailFull(value);
+            if (result.valid) {
+                clearError(groupEmail);
+                groupEmail.classList.add('has-success');
+                setEmailIndicator('valid');
+                showEmailMessage('valid', '<span class="msg-icon">✓</span><span class="msg-text">Email looks good</span>');
+            } else {
+                showError(groupEmail);
+                groupEmail.classList.remove('has-success');
+                setEmailIndicator('invalid');
+                let message = 'Invalid email address.';
+                if (result.reason === 'typo' && result.suggestion) {
+                    emailMessage.className = 'email-validation-message visible warning';
+                    emailMessage.innerHTML = `
+            <span class="msg-icon">⚠</span>
+            <span class="msg-text">
+              Did you mean
+              <button type="button" class="msg-suggestion" id="emailSuggestionBtnBlur">${result.suggestion}</button>?
+            </span>
+          `;
+                    setTimeout(() => {
+                        const btn = document.getElementById('emailSuggestionBtnBlur');
+                        if (btn) {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                fbEmail.value = result.suggestion;
+                                fbEmail.focus();
+                                runLiveEmailValidation();
+                            });
+                        }
+                    }, 0);
+                    return;
+                }
+                if (result.reason === 'no-at') message = 'Missing "@" symbol.';
+                else if (result.reason === 'multiple-at') message = 'Only one "@" is allowed.';
+                else if (result.reason === 'no-local') message = 'Missing username before "@".';
+                else if (result.reason === 'no-domain') message = 'Missing domain after "@".';
+                else if (result.reason === 'no-dot') message = 'Domain is missing a dot (e.g. .com).';
+                else if (result.reason === 'spaces') message = 'Email cannot contain spaces.';
+                else if (result.reason === 'consecutive-dots') message = 'Email cannot contain "..".';
+                else if (result.reason === 'format') message = 'Email format is not valid.';
+                showEmailMessage('invalid',
+                    `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
+            }
+        });
+
+        function clearError(group) { group.classList.remove('has-error'); }
+        function showError(group) { group.classList.add('has-error'); }
+        function showFormStatus(type, message) {
+            formStatus.textContent = message;
+            formStatus.className = `form-status visible ${type}`;
+        }
+        function hideFormStatus() {
+            formStatus.className = 'form-status';
+            formStatus.textContent = '';
+        }
+
+        function validateName() {
+            const ok = fbName.value.trim().length > 0;
+            if (ok) clearError(groupName); else showError(groupName);
+            return ok;
+        }
+        function validateMessage() {
+            const ok = fbMessage.value.trim().length > 0;
+            if (ok) clearError(groupMessage); else showError(groupMessage);
+            return ok;
+        }
+
+        fbName.addEventListener('input', () => { if (fbName.value.trim().length > 0) clearError(groupName); });
+        fbMessage.addEventListener('input', () => { if (fbMessage.value.trim().length > 0) clearError(groupMessage); });
+
+        fbName.addEventListener('blur', validateName);
+        fbMessage.addEventListener('blur', validateMessage);
+
+        feedbackForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideFormStatus();
+
+            clearError(groupName);
+            clearError(groupEmail);
+            clearError(groupMessage);
+            groupEmail.classList.remove('has-success');
+
+            const nameOk = validateName();
+            const messageOk = validateMessage();
+
+            const emailResult = validateEmailFull(fbEmail.value);
+            const emailOk = emailResult.valid;
+            if (!emailOk) {
+                showError(groupEmail);
+                setEmailIndicator('invalid');
+                if (emailResult.suggestion) {
+                    emailMessage.className = 'email-validation-message visible warning';
+                    emailMessage.innerHTML = `
+            <span class="msg-icon">⚠</span>
+            <span class="msg-text">
+              Did you mean
+              <button type="button" class="msg-suggestion" id="emailSuggestionSubmit">${emailResult.suggestion}</button>?
+            </span>
+          `;
+                    setTimeout(() => {
+                        const btn = document.getElementById('emailSuggestionSubmit');
+                        if (btn) {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                fbEmail.value = emailResult.suggestion;
+                                fbEmail.focus();
+                                runLiveEmailValidation();
+                            });
+                        }
+                    }, 0);
+                } else {
+                    showEmailMessage('invalid', '<span class="msg-icon">✕</span><span class="msg-text">Please enter a valid email address.</span>');
+                }
+            } else {
+                groupEmail.classList.add('has-success');
+            }
+
+            if (!nameOk || !emailOk || !messageOk) {
+                const firstError = feedbackForm.querySelector('.has-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
+
+            const formData = new FormData(feedbackForm);
+
+            fetch(feedbackForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
+                        feedbackForm.reset();
+                        groupEmail.classList.remove('has-success');
+                        setEmailIndicator('none');
+                        hideEmailMessage();
+                        setTimeout(hideFormStatus, 6000);
+                    } else {
+                        throw new Error('Server returned ' + response.status);
+                    }
+                })
+                .catch(err => {
+                    console.error('Form submit error:', err);
+                    showFormStatus('error', '❌ Failed to send. Please try again later.');
+                    setTimeout(hideFormStatus, 8000);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Message';
+                });
+        });
+
+        let hiddenPausedAt = 0;
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                hiddenPausedAt = Date.now();
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+            } else {
+                const hiddenFor = Date.now() - hiddenPausedAt;
+                if (hiddenFor > 5 * 60 * 1000) {
+                    updateAll();
+                } else {
+                    startCountdown();
+                }
+            }
+        });
+
+        async function init() {
+            intervalLabel.textContent = REFRESH_HOURS;
+            cities = loadCities();
+            initThemeFromStorage();
+            initFeedbackState();
+
+            if (getConsent()) {
+                const cacheResult = await cacheGet('weather-data');
+                if (cacheResult && cacheResult.data) {
+                    console.log('📦 Rendering from Cache API instantly');
+                    renderCards(cacheResult.data);
+                } else {
+                    const storageCache = loadWeatherCacheFromStorage();
+                    if (storageCache && storageCache.data) {
+                        console.log('📦 Rendering from localStorage instantly');
+                        renderCards(storageCache.data);
+                    }
+                }
+            }
+
+            if (!getConsent()) {
+                setTimeout(showCookieBanner, 800);
+            }
+
+            updateAll();
+
+            refreshBtn.addEventListener('click', () => updateAll());
+            setInterval(() => updateAll(), REFRESH_HOURS * 3600 * 1000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
