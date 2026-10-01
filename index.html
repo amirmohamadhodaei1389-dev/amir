@@ -259,7 +259,6 @@
             gap: 0.5rem;
         }
 
-        /* ✅ تغییر: از چرخش به حرکت آروم بالا-پایین */
         .title h1 .title-icon {
             display: inline-block;
             animation: titleIconFloat 3s ease-in-out infinite;
@@ -2346,6 +2345,7 @@
                         <input type="hidden" name="_subject" value="Weather Site Feedback">
                         <input type="hidden" name="_captcha" value="false">
                         <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_next" value="https://weather-sudo.github.io/amir/?feedback=success">
 
                         <div class="form-row">
                             <div class="form-group" id="group-name">
@@ -3716,7 +3716,6 @@
         fbMessage.addEventListener('blur', validateMessage);
 
         feedbackForm.addEventListener('submit', (e) => {
-            e.preventDefault();
             hideFormStatus();
 
             clearError(groupName);
@@ -3759,7 +3758,9 @@
                 groupEmail.classList.add('has-success');
             }
 
+            // ✅ اگه اعتبارسنجی خطا داشت، جلوی ارسال رو بگیر
             if (!nameOk || !emailOk || !messageOk) {
+                e.preventDefault();
                 const firstError = feedbackForm.querySelector('.has-error');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -3767,37 +3768,9 @@
                 return;
             }
 
+            // ✅ اعتبارسنجی درست بود — بذار مرورگر فرم رو ارسال کنه (بدون fetch)
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending…';
-
-            const formData = new FormData(feedbackForm);
-
-            fetch(feedbackForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'Accept': 'application/json' }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
-                        feedbackForm.reset();
-                        groupEmail.classList.remove('has-success');
-                        setEmailIndicator('none');
-                        hideEmailMessage();
-                        setTimeout(hideFormStatus, 6000);
-                    } else {
-                        throw new Error('Server returned ' + response.status);
-                    }
-                })
-                .catch(err => {
-                    console.error('Form submit error:', err);
-                    showFormStatus('error', '❌ Failed to send. Please try again later.');
-                    setTimeout(hideFormStatus, 8000);
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Send Message';
-                });
         });
 
         let hiddenPausedAt = 0;
@@ -3823,6 +3796,19 @@
             cities = loadCities();
             initThemeFromStorage();
             initFeedbackState();
+
+            // ✅ اگه کاربر از فرم برگشت، پیام موفقیت نشون بده
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('feedback') === 'success') {
+                    window.history.replaceState({}, '', window.location.pathname);
+                    setTimeout(() => {
+                        setFeedbackOpen(true, false);
+                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
+                        setTimeout(hideFormStatus, 6000);
+                    }, 500);
+                }
+            } catch (e) { }
 
             if (getConsent()) {
                 const cacheResult = await cacheGet('weather-data');
