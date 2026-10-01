@@ -3519,12 +3519,15 @@
                 return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
             }
 
+            // ✅ اگه دامنه از قبل توی لیست دامنه‌های معروف هست، مستقیم قبولش کن
+            if (COMMON_DOMAINS.includes(lowerDomain)) {
+                return { valid: true, reason: 'ok', suggestion: null };
+            }
+
             for (const common of COMMON_DOMAINS) {
-                if (lowerDomain !== common) {
-                    const distance = levenshtein(lowerDomain, common);
-                    if (distance === 1 || (distance === 2 && lowerDomain.length > 6)) {
-                        return { valid: false, reason: 'typo', suggestion: `${local}@${common}` };
-                    }
+                const distance = levenshtein(lowerDomain, common);
+                if (distance === 1 || (distance === 2 && lowerDomain.length > 6)) {
+                    return { valid: false, reason: 'typo', suggestion: `${local}@${common}` };
                 }
             }
 
