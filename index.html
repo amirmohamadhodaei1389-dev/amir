@@ -259,6 +259,7 @@
             gap: 0.5rem;
         }
 
+        /* ✅ تغییر: از چرخش به حرکت آروم بالا-پایین */
         .title h1 .title-icon {
             display: inline-block;
             animation: titleIconFloat 3s ease-in-out infinite;
@@ -2340,12 +2341,11 @@
 
             <div class="feedback-body" id="feedbackBody">
                 <div class="feedback-inner">
-                    <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/4483217847e0cb073468dfd5b87fc04f"
+                    <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/amirmohamad.hodaei2010@gmail.com"
                         method="POST" novalidate>
                         <input type="hidden" name="_subject" value="Weather Site Feedback">
                         <input type="hidden" name="_captcha" value="false">
                         <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_next" value="https://weather-sudo.github.io/amir/?feedback=success">
 
                         <div class="form-row">
                             <div class="form-group" id="group-name">
@@ -3717,7 +3717,6 @@
 
         feedbackForm.addEventListener('submit', (e) => {
             hideFormStatus();
-
             clearError(groupName);
             clearError(groupEmail);
             clearError(groupMessage);
@@ -3725,9 +3724,9 @@
 
             const nameOk = validateName();
             const messageOk = validateMessage();
-
             const emailResult = validateEmailFull(fbEmail.value);
             const emailOk = emailResult.valid;
+
             if (!emailOk) {
                 showError(groupEmail);
                 setEmailIndicator('invalid');
@@ -3743,8 +3742,8 @@
                     setTimeout(() => {
                         const btn = document.getElementById('emailSuggestionSubmit');
                         if (btn) {
-                            btn.addEventListener('click', (e) => {
-                                e.preventDefault();
+                            btn.addEventListener('click', (ev) => {
+                                ev.preventDefault();
                                 fbEmail.value = emailResult.suggestion;
                                 fbEmail.focus();
                                 runLiveEmailValidation();
@@ -3758,19 +3757,15 @@
                 groupEmail.classList.add('has-success');
             }
 
-            // ✅ اگه اعتبارسنجی خطا داشت، جلوی ارسال رو بگیر
+            // اگه اعتبارسنجی خطا داشت، جلوی ارسال رو بگیر
             if (!nameOk || !emailOk || !messageOk) {
                 e.preventDefault();
                 const firstError = feedbackForm.querySelector('.has-error');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                return;
             }
-
-            // ✅ اعتبارسنجی درست بود — بذار مرورگر فرم رو ارسال کنه (بدون fetch)
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending…';
+            // اگه همه چیز درست بود، مرورگر خودش فرم رو به روش POST ارسال می‌کنه
         });
 
         let hiddenPausedAt = 0;
@@ -3796,19 +3791,6 @@
             cities = loadCities();
             initThemeFromStorage();
             initFeedbackState();
-
-            // ✅ اگه کاربر از فرم برگشت، پیام موفقیت نشون بده
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('feedback') === 'success') {
-                    window.history.replaceState({}, '', window.location.pathname);
-                    setTimeout(() => {
-                        setFeedbackOpen(true, false);
-                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
-                        setTimeout(hideFormStatus, 6000);
-                    }, 500);
-                }
-            } catch (e) { }
 
             if (getConsent()) {
                 const cacheResult = await cacheGet('weather-data');
