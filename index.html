@@ -2096,9 +2096,9 @@
         const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
         const WTTR_API = 'https://wttr.in';
         const FETCH_TIMEOUT_MS = 12000;
-        const MIN_REQUEST_INTERVAL_MS = 600; // بین درخواست‌های Open-Meteo
-        const MIN_CACHE_AGE_MS = 15 * 60 * 1000; // 15 دقیقه — حداقل فاصله بین fetch خودکار
-        const MAX_HIDDEN_BEFORE_REFRESH_MS = 30 * 60 * 1000; // 30 دقیقه
+        const MIN_REQUEST_INTERVAL_MS = 600;
+        const MIN_CACHE_AGE_MS = 15 * 60 * 1000;
+        const MAX_HIDDEN_BEFORE_REFRESH_MS = 30 * 60 * 1000;
 
         const COOKIE_CONSENT_KEY = 'iran_weather_cookie_consent';
         const COOKIE_CITIES_KEY = 'iran_weather_cities';
@@ -2114,7 +2114,6 @@
             { name: 'Tehran', lat: 35.6892, lon: 51.3890 }
         ];
 
-        // ⚡ لیست محلی شهرهای ایران برای پاسخ فوری
         const IRAN_CITIES = [
             { name: 'Tehran', lat: 35.6892, lon: 51.3890, admin: 'Tehran', country: 'Iran', country_code: 'IR' },
             { name: 'Mashhad', lat: 36.2605, lon: 59.6168, admin: 'Razavi Khorasan', country: 'Iran', country_code: 'IR' },
@@ -2220,10 +2219,8 @@
                 console.log(`[SelfHeal] ${event}:`, detail || '');
             },
 
-            // Storage Doctor: پاک‌سازی و بازسازی کش خراب
             checkStorage() {
                 try {
-                    // چک کردن کش آب‌وهوا
                     const raw = storeGet(COOKIE_CACHE_KEY);
                     if (raw) {
                         const parsed = JSON.parse(raw);
@@ -2232,7 +2229,6 @@
                             storeDelete(COOKIE_CACHE_KEY);
                         }
                     }
-                    // چک کردن شهرها
                     const citiesRaw = storeGet(COOKIE_CITIES_KEY);
                     if (citiesRaw) {
                         const parsed = JSON.parse(citiesRaw);
@@ -2248,7 +2244,6 @@
                 }
             },
 
-            // Data Integrity: بررسی صحت داده آب‌وهوا
             isValidWeather(weather) {
                 if (!weather || !weather.current) return false;
                 const c = weather.current;
@@ -2258,18 +2253,14 @@
                 return true;
             },
 
-            // Watchdog: چک کردن سلامت کلی
             watchdog() {
                 const now = Date.now();
                 this.stats.lastCheck = now;
 
-                // چک کردن اینکه آیا fetch در زمان معقولی انجام شده
                 if (lastFetchTimestamp > 0) {
                     const age = now - lastFetchTimestamp;
-                    // اگه بیش از 4 ساعت گذشته و تب دیده میشه، احتمالاً مشکلی هست
                     if (age > 4 * 3600 * 1000 && !document.hidden && !isFetching) {
                         this.record('watchdog-stale', `${Math.round(age / 60000)} min since last fetch`);
-                        // fetch رو دوباره راه بنداز
                         setTimeout(() => updateAll(true), 1000);
                     }
                 }
@@ -2280,7 +2271,6 @@
                 this.record('repair', `${type}: ${detail}`);
             },
 
-            // گزارش تشخیصی
             report() {
                 return {
                     repairs: this.stats.repairs,
@@ -2295,7 +2285,7 @@
         };
 
         // ============================================================
-        //  ✨ REQUEST QUEUE برای Open-Meteo (۱ درخواست همزمان)
+        //  REQUEST QUEUE
         // ============================================================
         const omQueue = {
             items: [],
@@ -2314,13 +2304,11 @@
                 this.processing = true;
 
                 while (this.items.length > 0) {
-                    // اگه تب مخفی شد، صبر کن
                     if (document.hidden) {
                         await new Promise(r => setTimeout(r, 1000));
                         continue;
                     }
 
-                    // فاصله بین درخواست‌ها
                     const elapsed = Date.now() - this.lastRun;
                     if (elapsed < MIN_REQUEST_INTERVAL_MS) {
                         await new Promise(r => setTimeout(r, MIN_REQUEST_INTERVAL_MS - elapsed));
@@ -2343,7 +2331,7 @@
         };
 
         // ============================================================
-        //  ✨ FETCH با Timeout + Abort + Exponential Backoff
+        //  FETCH
         // ============================================================
         const activeControllers = new Set();
 
@@ -2379,10 +2367,6 @@
             });
             activeControllers.clear();
             if (count > 0) console.log(`🛑 Aborted ${count} pending request(s)`);
-        }
-
-        async function sleep(ms) {
-            return new Promise(r => setTimeout(r, ms));
         }
 
         // ============================================================
@@ -2531,7 +2515,7 @@
         let lastFetchTimestamp = 0;
 
         // ============================================================
-        //  ✨ SOURCE HEALTH (Circuit Breaker)
+        //  SOURCE HEALTH (Circuit Breaker)
         // ============================================================
         const sourceHealth = {
             'weather:openmeteo': { ok: 0, fail: 0, skippedUntil: 0 },
@@ -2679,7 +2663,6 @@
             else statusEl.textContent = text;
         }
 
-        // DOM کش شده برای شمارش معکوس
         const countdownDigitEls = {
             h0: document.querySelector('[data-digit="h0"] > span'),
             h1: document.querySelector('[data-digit="h1"] > span'),
@@ -2762,14 +2745,13 @@
         }
 
         // ============================================================
-        //  ✨ SEARCH CACHE (localStorage)
+        //  SEARCH CACHE
         // ============================================================
         function loadSearchCache() {
             try {
                 const raw = storeGet(COOKIE_SEARCH_CACHE_KEY);
                 if (!raw) return {};
                 const parsed = JSON.parse(raw);
-                // پاک کردن ورودی‌های قدیمی‌تر از 24 ساعت
                 const now = Date.now();
                 const clean = {};
                 for (const [k, v] of Object.entries(parsed)) {
@@ -2783,7 +2765,6 @@
 
         function saveSearchCache(cache) {
             try {
-                // محدود کردن به 50 ورودی
                 const entries = Object.entries(cache);
                 if (entries.length > 50) {
                     entries.sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
@@ -2805,7 +2786,7 @@
         }
 
         // ============================================================
-        //  ✨ IRAN LOCAL SEARCH (فوری)
+        //  IRAN LOCAL SEARCH
         // ============================================================
         function searchLocalIran(query) {
             const q = query.toLowerCase().trim();
@@ -2820,7 +2801,6 @@
         //  SEARCH + SUGGESTIONS
         // ============================================================
         async function fetchSuggestions(query) {
-            // چک کش اول
             const cached = getCachedSearch(query);
             if (cached) {
                 console.log(`💾 Search cache hit: "${query}"`);
@@ -2835,12 +2815,10 @@
             const data = await res.json();
             const results = data.results || [];
 
-            // ذخیره در کش
             setCachedSearch(query, results);
             return results;
         }
 
-        // ✨ سورت کردن: ایران اول، بعد بقیه
         function sortResultsIranFirst(results) {
             if (!results || results.length === 0) return results;
             return [...results].sort((a, b) => {
@@ -2851,7 +2829,6 @@
         }
 
         function renderSuggestions(results, query) {
-            // سورت کردن
             results = sortResultsIranFirst(results);
 
             currentSuggestions = results;
@@ -2866,7 +2843,7 @@
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
                 item.dataset.index = index;
-                const admin = r.admin1 || r.admin2 || '';
+                const admin = r.admin1 || r.admin2 || r.admin || '';
                 const country = r.country || '';
                 item.innerHTML = `
                     <div class="suggestion-left">
@@ -2905,7 +2882,6 @@
             if (!r) return;
             hideSuggestions();
             searchInput.value = '';
-            // نرمالایز کردن نام (چون API ممکنه name متفاوت بده)
             const lat = r.latitude ?? r.lat;
             const lon = r.longitude ?? r.lon;
             if (cities.some(c => c.name.toLowerCase() === r.name.toLowerCase() && Math.abs(c.lat - lat) < 0.01)) {
@@ -2918,29 +2894,24 @@
             await updateAll(true);
         }
 
-        // ⚡ Debounce سریع‌تر
         searchInput.addEventListener('input', () => {
             const q = searchInput.value.trim();
             clearTimeout(suggestDebounce);
             if (q.length < 2) { hideSuggestions(); return; }
 
-            // ✨ اول جستجوی محلی (فوری)
             const localResults = searchLocalIran(q);
             if (localResults.length > 0) {
-                // نمایش فوری نتایج محلی
                 renderSuggestions(localResults, q);
             } else {
                 suggestionsEl.innerHTML = '<div class="suggestions-loading">Searching…</div>';
                 suggestionsEl.classList.add('visible');
             }
 
-            // Debounce سریع‌تر
             const debounceMs = device.isMobile ? 150 : 100;
             suggestDebounce = setTimeout(async () => {
                 try {
                     const results = await fetchSuggestions(q);
                     if (searchInput.value.trim() === q) {
-                        // ادغام نتایج محلی + نتایج API (بدون تکرار)
                         const seen = new Set();
                         const merged = [];
                         for (const r of [...localResults, ...results]) {
@@ -3009,13 +2980,11 @@
         }
 
         // ============================================================
-        //  WEATHER FETCHING — Multi-source + Queue + Backoff
+        //  WEATHER FETCHING
         // ============================================================
-
         async function fetchAllCitiesData(citiesList) {
             if (!citiesList || citiesList.length === 0) return [];
 
-            // ✨ تقسیم به دو گروه: اول آب‌وهوا، بعد AQI — هرکدوم جدا
             const weatherResults = await fetchWeatherFromBestSource(citiesList);
             const aqiResults = await fetchAQIFromBestSource(citiesList);
 
@@ -3027,7 +2996,6 @@
         }
 
         async function fetchWeatherFromBestSource(citiesList) {
-            // 1. Open-Meteo (با Queue)
             if (!isSourceSkipped('weather:openmeteo')) {
                 try {
                     const results = await omQueue.add(() => fetchBatch(citiesList), 'weather-batch');
@@ -3049,7 +3017,6 @@
 
             if (document.hidden) return citiesList.map(city => ({ city, weather: null }));
 
-            // 2. wttr.in (fallback)
             if (!isSourceSkipped('weather:wttr')) {
                 try {
                     console.log('🔄 Falling back to wttr.in...');
@@ -3105,15 +3072,12 @@
             const weatherUrl = `${WEATHER_API}?latitude=${latParam}&longitude=${lonParam}&${weatherParams}`;
             const res = await fetchWithTimeout(weatherUrl, {}, 12000);
 
-            if (res.status === 429) {
-                throw new Error('Open-Meteo rate limit (429)');
-            }
+            if (res.status === 429) throw new Error('Open-Meteo rate limit (429)');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const json = await res.json();
             const arr = Array.isArray(json) ? json : [json];
 
-            // ✨ Data Integrity Check
             return citiesList.map((city, i) => {
                 const w = arr[i] || null;
                 if (w && !SelfHeal.isValidWeather(w)) {
@@ -3314,8 +3278,10 @@
             setTimeout(doRemove, 500);
         }
 
+        // ============================================================
+        //  ✨ UPDATE ALL — with cache-age handling fix
+        // ============================================================
         async function updateAll(force = false) {
-            // Skip if hidden
             if (document.hidden) {
                 console.log('⏸️ Skipped fetch: tab hidden');
                 return;
@@ -3325,12 +3291,14 @@
                 return;
             }
 
-            // حداقل فاصله بین fetchهای خودکار
             if (!force && lastFetchTimestamp > 0) {
                 const age = Date.now() - lastFetchTimestamp;
                 if (age < MIN_CACHE_AGE_MS) {
                     const remainSec = Math.round((MIN_CACHE_AGE_MS - age) / 1000);
                     console.log(`⏸️ Skipped fetch: cache fresh (${remainSec}s remaining)`);
+                    // ✅ FIX: status و countdown رو آپدیت کن تا UI گیر نکنه
+                    setStatus('Ready ✅');
+                    startCountdown();
                     return;
                 }
             }
@@ -3407,7 +3375,6 @@
             }
         }
 
-        // ✨ رندر با DocumentFragment (سریع‌تر)
         function renderCards(results) {
             const fragment = document.createDocumentFragment();
             const wasFirstLoad = isFirstLoad;
@@ -3434,7 +3401,7 @@
             isFirstLoad = false;
             lastAddedCityName = null;
 
-            // ✨ اسکرول خودکار روی موبایل وقتی شهر جدید اد شد
+            // ✨ اسکرول خودکار روی موبایل
             if (addedName && device.isMobile) {
                 setTimeout(() => {
                     const newCard = cardsEl.querySelector('.newly-added');
@@ -3584,7 +3551,6 @@
             cities = loadCities();
             initThemeFromStorage();
 
-            // ✨ Self-healing: چک کردن سلامت Storage
             SelfHeal.checkStorage();
 
             // رندر از کش فوری
@@ -3608,20 +3574,19 @@
                 setTimeout(showCookieBanner, 800);
             }
 
+            // ✅ FIX: همیشه force fetch کن موقع init
             if (!document.hidden) {
-                updateAll();
+                updateAll(true);
             }
 
             startRefreshInterval();
 
-            // ✨ Watchdog: هر 5 دقیقه چک سلامت
             watchdogTimer = setInterval(() => {
                 if (!document.hidden) SelfHeal.watchdog();
             }, 5 * 60 * 1000);
 
             refreshBtn.addEventListener('click', () => updateAll(true));
 
-            // ✨ API دیباگ در Console
             window.diagnose = () => {
                 const r = SelfHeal.report();
                 console.table(r.sources);
