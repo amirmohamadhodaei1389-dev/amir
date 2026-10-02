@@ -10,6 +10,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
+    <link rel="preconnect" href="https://air-quality-api.open-meteo.com" crossorigin>
+    <link rel="preconnect" href="https://geocoding-api.open-meteo.com" crossorigin>
+    <link rel="dns-prefetch" href="https://wttr.in">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- GoatCounter Analytics -->
@@ -89,7 +93,6 @@
         .ambient-orb {
             position: absolute;
             border-radius: 50%;
-            will-change: transform;
             transform: translateZ(0);
         }
 
@@ -262,7 +265,6 @@
             display: inline-block;
             animation: titleIconFloat 3s ease-in-out infinite;
             transform-origin: center;
-            will-change: transform;
         }
 
         @keyframes titleIconFloat {
@@ -651,6 +653,8 @@
             min-width: 0;
             overflow: hidden;
             transform: translateZ(0);
+            content-visibility: auto;
+            contain-intrinsic-size: auto 400px;
         }
 
         .card:active {
@@ -760,7 +764,6 @@
                 cardAddRipple 1.3s ease-out 0.2s;
             z-index: 10;
             border-color: var(--accent);
-            will-change: transform, opacity, box-shadow;
         }
 
         .card.no-anim {
@@ -821,7 +824,6 @@
             display: inline-block;
             transform-origin: center;
             animation: iconFloat 3.2s ease-in-out infinite;
-            will-change: transform;
         }
 
         @keyframes iconFloat {
@@ -1904,7 +1906,7 @@
 
         <div class="search-wrapper">
             <div class="search-box">
-                <input type="text" id="citySearch" placeholder="Add a city… (e.g. Tehran, Mashhad, Shiraz)" autocomplete="off" spellcheck="false">
+                <input type="text" id="citySearch" placeholder="Add a city… (e.g. Tehran, Paris, Tokyo)" autocomplete="off" spellcheck="false">
                 <button id="addCityBtn">Add</button>
             </div>
             <div id="suggestions" class="suggestions"></div>
@@ -2093,12 +2095,16 @@
         const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
         const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
         const WTTR_API = 'https://wttr.in';
-        const FETCH_TIMEOUT_MS = 15000;
+        const FETCH_TIMEOUT_MS = 12000;
+        const MIN_REQUEST_INTERVAL_MS = 600; // بین درخواست‌های Open-Meteo
+        const MIN_CACHE_AGE_MS = 15 * 60 * 1000; // 15 دقیقه — حداقل فاصله بین fetch خودکار
+        const MAX_HIDDEN_BEFORE_REFRESH_MS = 30 * 60 * 1000; // 30 دقیقه
 
         const COOKIE_CONSENT_KEY = 'iran_weather_cookie_consent';
         const COOKIE_CITIES_KEY = 'iran_weather_cities';
         const COOKIE_THEME_KEY = 'iran_weather_theme';
         const COOKIE_CACHE_KEY = 'iran_weather_cache';
+        const COOKIE_SEARCH_CACHE_KEY = 'iran_weather_search_cache';
         const COOKIE_DAYS = 365;
 
         const CACHE_NAME = 'iran-weather-cache-v1';
@@ -2106,6 +2112,41 @@
 
         const DEFAULT_CITIES = [
             { name: 'Tehran', lat: 35.6892, lon: 51.3890 }
+        ];
+
+        // ⚡ لیست محلی شهرهای ایران برای پاسخ فوری
+        const IRAN_CITIES = [
+            { name: 'Tehran', lat: 35.6892, lon: 51.3890, admin: 'Tehran', country: 'Iran', country_code: 'IR' },
+            { name: 'Mashhad', lat: 36.2605, lon: 59.6168, admin: 'Razavi Khorasan', country: 'Iran', country_code: 'IR' },
+            { name: 'Isfahan', lat: 32.6546, lon: 51.6680, admin: 'Isfahan', country: 'Iran', country_code: 'IR' },
+            { name: 'Shiraz', lat: 29.5918, lon: 52.5837, admin: 'Fars', country: 'Iran', country_code: 'IR' },
+            { name: 'Tabriz', lat: 38.0962, lon: 46.2738, admin: 'East Azerbaijan', country: 'Iran', country_code: 'IR' },
+            { name: 'Ahvaz', lat: 31.3167, lon: 48.6844, admin: 'Khuzestan', country: 'Iran', country_code: 'IR' },
+            { name: 'Qom', lat: 34.6416, lon: 50.8746, admin: 'Qom', country: 'Iran', country_code: 'IR' },
+            { name: 'Karaj', lat: 35.8355, lon: 50.9915, admin: 'Alborz', country: 'Iran', country_code: 'IR' },
+            { name: 'Ardabil', lat: 38.2494, lon: 48.3014, admin: 'Ardabil', country: 'Iran', country_code: 'IR' },
+            { name: 'Sari', lat: 36.5633, lon: 53.0601, admin: 'Mazandaran', country: 'Iran', country_code: 'IR' },
+            { name: 'Arak', lat: 34.1380, lon: 49.8470, admin: 'Markazi', country: 'Iran', country_code: 'IR' },
+            { name: 'Urmia', lat: 37.5553, lon: 45.0725, admin: 'West Azerbaijan', country: 'Iran', country_code: 'IR' },
+            { name: 'Sardasht', lat: 36.1580, lon: 45.4752, admin: 'West Azerbaijan', country: 'Iran', country_code: 'IR' },
+            { name: 'Gorgan', lat: 36.8378, lon: 54.4414, admin: 'Golestan', country: 'Iran', country_code: 'IR' },
+            { name: 'Bam', lat: 29.1060, lon: 58.3570, admin: 'Kerman', country: 'Iran', country_code: 'IR' },
+            { name: 'Rasht', lat: 37.2808, lon: 49.5832, admin: 'Gilan', country: 'Iran', country_code: 'IR' },
+            { name: 'Kerman', lat: 30.2839, lon: 57.0834, admin: 'Kerman', country: 'Iran', country_code: 'IR' },
+            { name: 'Yazd', lat: 31.8974, lon: 54.3569, admin: 'Yazd', country: 'Iran', country_code: 'IR' },
+            { name: 'Kermanshah', lat: 34.3142, lon: 47.0650, admin: 'Kermanshah', country: 'Iran', country_code: 'IR' },
+            { name: 'Zahedan', lat: 29.4963, lon: 60.8629, admin: 'Sistan & Baluchestan', country: 'Iran', country_code: 'IR' },
+            { name: 'Hamadan', lat: 34.7983, lon: 48.5148, admin: 'Hamadan', country: 'Iran', country_code: 'IR' },
+            { name: 'Bandar Abbas', lat: 27.1832, lon: 56.2666, admin: 'Hormozgan', country: 'Iran', country_code: 'IR' },
+            { name: 'Bushehr', lat: 28.9234, lon: 50.8200, admin: 'Bushehr', country: 'Iran', country_code: 'IR' },
+            { name: 'Qazvin', lat: 36.2688, lon: 50.0041, admin: 'Qazvin', country: 'Iran', country_code: 'IR' },
+            { name: 'Sanandaj', lat: 35.3149, lon: 46.9921, admin: 'Kurdistan', country: 'Iran', country_code: 'IR' },
+            { name: 'Khorramabad', lat: 33.4878, lon: 48.3558, admin: 'Lorestan', country: 'Iran', country_code: 'IR' },
+            { name: 'Birjand', lat: 32.8663, lon: 59.2211, admin: 'South Khorasan', country: 'Iran', country_code: 'IR' },
+            { name: 'Bojnord', lat: 37.4747, lon: 57.3290, admin: 'North Khorasan', country: 'Iran', country_code: 'IR' },
+            { name: 'Shahr-e Kord', lat: 32.3260, lon: 50.8644, admin: 'Chaharmahal', country: 'Iran', country_code: 'IR' },
+            { name: 'Ilam', lat: 33.6374, lon: 46.4227, admin: 'Ilam', country: 'Iran', country_code: 'IR' },
+            { name: 'Semnan', lat: 35.5769, lon: 53.3953, admin: 'Semnan', country: 'Iran', country_code: 'IR' }
         ];
 
         const WMO = {
@@ -2139,7 +2180,6 @@
             99: { desc: 'Thunderstorm w/ heavy hail', icon: '⛈️' }
         };
 
-        // WWW weather code (wttr.in) -> WMO weather code mapping
         const WWW_TO_WMO = {
             113: 0, 116: 2, 119: 3, 122: 3,
             143: 45, 248: 45, 260: 48,
@@ -2161,19 +2201,193 @@
             return WWW_TO_WMO[parseInt(wwwCode)] ?? 0;
         }
 
+        // ============================================================
+        //  ✨ SELF-HEALING SYSTEM
+        // ============================================================
+        const SelfHeal = {
+            stats: {
+                repairs: 0,
+                failures: 0,
+                lastCheck: 0,
+                consecutiveFails: 0
+            },
+            log: [],
+
+            record(event, detail) {
+                const entry = { time: Date.now(), event, detail };
+                this.log.push(entry);
+                if (this.log.length > 50) this.log.shift();
+                console.log(`[SelfHeal] ${event}:`, detail || '');
+            },
+
+            // Storage Doctor: پاک‌سازی و بازسازی کش خراب
+            checkStorage() {
+                try {
+                    // چک کردن کش آب‌وهوا
+                    const raw = storeGet(COOKIE_CACHE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (!parsed || !Array.isArray(parsed.data)) {
+                            this.repair('storage-corrupt', 'clearing invalid weather cache');
+                            storeDelete(COOKIE_CACHE_KEY);
+                        }
+                    }
+                    // چک کردن شهرها
+                    const citiesRaw = storeGet(COOKIE_CITIES_KEY);
+                    if (citiesRaw) {
+                        const parsed = JSON.parse(citiesRaw);
+                        if (!Array.isArray(parsed) || parsed.some(c => !c.name || !isFinite(c.lat) || !isFinite(c.lon))) {
+                            this.repair('cities-corrupt', 'resetting invalid cities');
+                            storeDelete(COOKIE_CITIES_KEY);
+                            cities = [...DEFAULT_CITIES];
+                        }
+                    }
+                } catch (e) {
+                    this.repair('storage-parse-error', e.message);
+                    storeDelete(COOKIE_CACHE_KEY);
+                }
+            },
+
+            // Data Integrity: بررسی صحت داده آب‌وهوا
+            isValidWeather(weather) {
+                if (!weather || !weather.current) return false;
+                const c = weather.current;
+                if (typeof c.temperature_2m !== 'number') return false;
+                if (c.temperature_2m < -80 || c.temperature_2m > 70) return false;
+                if (c.relative_humidity_2m != null && (c.relative_humidity_2m < 0 || c.relative_humidity_2m > 100)) return false;
+                return true;
+            },
+
+            // Watchdog: چک کردن سلامت کلی
+            watchdog() {
+                const now = Date.now();
+                this.stats.lastCheck = now;
+
+                // چک کردن اینکه آیا fetch در زمان معقولی انجام شده
+                if (lastFetchTimestamp > 0) {
+                    const age = now - lastFetchTimestamp;
+                    // اگه بیش از 4 ساعت گذشته و تب دیده میشه، احتمالاً مشکلی هست
+                    if (age > 4 * 3600 * 1000 && !document.hidden && !isFetching) {
+                        this.record('watchdog-stale', `${Math.round(age / 60000)} min since last fetch`);
+                        // fetch رو دوباره راه بنداز
+                        setTimeout(() => updateAll(true), 1000);
+                    }
+                }
+            },
+
+            repair(type, detail) {
+                this.stats.repairs++;
+                this.record('repair', `${type}: ${detail}`);
+            },
+
+            // گزارش تشخیصی
+            report() {
+                return {
+                    repairs: this.stats.repairs,
+                    failures: this.stats.failures,
+                    sources: sourceHealth,
+                    lastFetch: lastFetchTimestamp ? new Date(lastFetchTimestamp).toLocaleString() : 'never',
+                    citiesCount: cities.length,
+                    queueLength: omQueue.items.length,
+                    log: this.log.slice(-10)
+                };
+            }
+        };
+
+        // ============================================================
+        //  ✨ REQUEST QUEUE برای Open-Meteo (۱ درخواست همزمان)
+        // ============================================================
+        const omQueue = {
+            items: [],
+            processing: false,
+            lastRun: 0,
+
+            async add(fn, label = 'task') {
+                return new Promise((resolve, reject) => {
+                    this.items.push({ fn, resolve, reject, label });
+                    this.process();
+                });
+            },
+
+            async process() {
+                if (this.processing) return;
+                this.processing = true;
+
+                while (this.items.length > 0) {
+                    // اگه تب مخفی شد، صبر کن
+                    if (document.hidden) {
+                        await new Promise(r => setTimeout(r, 1000));
+                        continue;
+                    }
+
+                    // فاصله بین درخواست‌ها
+                    const elapsed = Date.now() - this.lastRun;
+                    if (elapsed < MIN_REQUEST_INTERVAL_MS) {
+                        await new Promise(r => setTimeout(r, MIN_REQUEST_INTERVAL_MS - elapsed));
+                    }
+
+                    const item = this.items.shift();
+                    if (!item) break;
+
+                    try {
+                        const result = await item.fn();
+                        item.resolve(result);
+                    } catch (e) {
+                        item.reject(e);
+                    }
+                    this.lastRun = Date.now();
+                }
+
+                this.processing = false;
+            }
+        };
+
+        // ============================================================
+        //  ✨ FETCH با Timeout + Abort + Exponential Backoff
+        // ============================================================
+        const activeControllers = new Set();
+
         function fetchWithTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
             return new Promise((resolve, reject) => {
                 const controller = new AbortController();
+                activeControllers.add(controller);
+
                 const timer = setTimeout(() => {
                     controller.abort();
+                    activeControllers.delete(controller);
                     reject(new Error('Request timed out'));
                 }, timeout);
+
                 fetch(url, { ...options, signal: controller.signal })
-                    .then(res => { clearTimeout(timer); resolve(res); })
-                    .catch(err => { clearTimeout(timer); reject(err); });
+                    .then(res => {
+                        clearTimeout(timer);
+                        activeControllers.delete(controller);
+                        resolve(res);
+                    })
+                    .catch(err => {
+                        clearTimeout(timer);
+                        activeControllers.delete(controller);
+                        reject(err);
+                    });
             });
         }
 
+        function abortAllRequests() {
+            const count = activeControllers.size;
+            activeControllers.forEach(c => {
+                try { c.abort(); } catch (e) { }
+            });
+            activeControllers.clear();
+            if (count > 0) console.log(`🛑 Aborted ${count} pending request(s)`);
+        }
+
+        async function sleep(ms) {
+            return new Promise(r => setTimeout(r, ms));
+        }
+
+        // ============================================================
+        //  CACHE API
+        // ============================================================
         const cacheSupported = (() => {
             try { return typeof caches !== 'undefined' && caches !== null; }
             catch (e) { return false; }
@@ -2202,6 +2416,9 @@
             } catch (e) { return null; }
         }
 
+        // ============================================================
+        //  STORAGE
+        // ============================================================
         const memoryStore = Object.create(null);
 
         const cookiesEnabled = (() => {
@@ -2311,7 +2528,49 @@
         let weatherCache = null;
         let isFirstLoad = true;
         let lastAddedCityName = null;
+        let lastFetchTimestamp = 0;
 
+        // ============================================================
+        //  ✨ SOURCE HEALTH (Circuit Breaker)
+        // ============================================================
+        const sourceHealth = {
+            'weather:openmeteo': { ok: 0, fail: 0, skippedUntil: 0 },
+            'weather:wttr': { ok: 0, fail: 0, skippedUntil: 0 },
+            'aqi:openmeteo': { ok: 0, fail: 0, skippedUntil: 0 }
+        };
+
+        function markHealthy(key) {
+            const h = sourceHealth[key];
+            if (!h) return;
+            h.ok++;
+            h.fail = Math.max(0, h.fail - 1);
+        }
+
+        function markUnhealthy(key) {
+            const h = sourceHealth[key];
+            if (!h) return;
+            h.fail++;
+            if (h.fail >= 3) {
+                h.skippedUntil = Date.now() + 30 * 60 * 1000;
+                SelfHeal.record('circuit-open', `'${key}' disabled for 30 min (${h.fail} fails)`);
+            }
+        }
+
+        function isSourceSkipped(key) {
+            const h = sourceHealth[key];
+            if (!h) return false;
+            if (h.skippedUntil && Date.now() < h.skippedUntil) return true;
+            if (h.skippedUntil && Date.now() >= h.skippedUntil) {
+                h.skippedUntil = 0;
+                h.fail = 0;
+                SelfHeal.record('circuit-close', `'${key}' re-enabled`);
+            }
+            return false;
+        }
+
+        // ============================================================
+        //  CITY STORAGE
+        // ============================================================
         function loadCities() {
             if (!hasConsent()) return [...DEFAULT_CITIES];
             try {
@@ -2398,6 +2657,9 @@
             storeSet(COOKIE_THEME_KEY, theme, COOKIE_DAYS);
         }
 
+        // ============================================================
+        //  DOM CACHE
+        // ============================================================
         const $ = id => document.getElementById(id);
         const cardsEl = $('cards');
         const statusEl = $('status');
@@ -2417,6 +2679,7 @@
             else statusEl.textContent = text;
         }
 
+        // DOM کش شده برای شمارش معکوس
         const countdownDigitEls = {
             h0: document.querySelector('[data-digit="h0"] > span'),
             h1: document.querySelector('[data-digit="h1"] > span'),
@@ -2453,6 +2716,8 @@
         }
 
         let countdownTimer = null;
+        let refreshIntervalTimer = null;
+        let watchdogTimer = null;
         let isFetching = false;
         let suggestDebounce = null;
         let suggestAbort = null;
@@ -2496,17 +2761,99 @@
             catch (e) { return '—'; }
         }
 
+        // ============================================================
+        //  ✨ SEARCH CACHE (localStorage)
+        // ============================================================
+        function loadSearchCache() {
+            try {
+                const raw = storeGet(COOKIE_SEARCH_CACHE_KEY);
+                if (!raw) return {};
+                const parsed = JSON.parse(raw);
+                // پاک کردن ورودی‌های قدیمی‌تر از 24 ساعت
+                const now = Date.now();
+                const clean = {};
+                for (const [k, v] of Object.entries(parsed)) {
+                    if (v && v.ts && (now - v.ts) < 24 * 3600 * 1000) {
+                        clean[k] = v;
+                    }
+                }
+                return clean;
+            } catch (e) { return {}; }
+        }
+
+        function saveSearchCache(cache) {
+            try {
+                // محدود کردن به 50 ورودی
+                const entries = Object.entries(cache);
+                if (entries.length > 50) {
+                    entries.sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+                    cache = Object.fromEntries(entries.slice(0, 50));
+                }
+                storeSet(COOKIE_SEARCH_CACHE_KEY, JSON.stringify(cache), 1);
+            } catch (e) { }
+        }
+
+        function getCachedSearch(query) {
+            const cache = loadSearchCache();
+            return cache[query.toLowerCase()]?.results || null;
+        }
+
+        function setCachedSearch(query, results) {
+            const cache = loadSearchCache();
+            cache[query.toLowerCase()] = { results, ts: Date.now() };
+            saveSearchCache(cache);
+        }
+
+        // ============================================================
+        //  ✨ IRAN LOCAL SEARCH (فوری)
+        // ============================================================
+        function searchLocalIran(query) {
+            const q = query.toLowerCase().trim();
+            if (q.length < 2) return [];
+            return IRAN_CITIES.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                c.admin.toLowerCase().includes(q)
+            ).slice(0, 8);
+        }
+
+        // ============================================================
+        //  SEARCH + SUGGESTIONS
+        // ============================================================
         async function fetchSuggestions(query) {
+            // چک کش اول
+            const cached = getCachedSearch(query);
+            if (cached) {
+                console.log(`💾 Search cache hit: "${query}"`);
+                return cached;
+            }
+
             if (suggestAbort) suggestAbort.abort();
             suggestAbort = new AbortController();
-            const url = `${GEO_API}?name=${encodeURIComponent(query)}&count=8&language=en&format=json`;
+            const url = `${GEO_API}?name=${encodeURIComponent(query)}&count=10&language=en&format=json`;
             const res = await fetch(url, { signal: suggestAbort.signal });
             if (!res.ok) throw new Error('Geocoding failed');
             const data = await res.json();
-            return data.results || [];
+            const results = data.results || [];
+
+            // ذخیره در کش
+            setCachedSearch(query, results);
+            return results;
+        }
+
+        // ✨ سورت کردن: ایران اول، بعد بقیه
+        function sortResultsIranFirst(results) {
+            if (!results || results.length === 0) return results;
+            return [...results].sort((a, b) => {
+                const aIR = a.country_code === 'IR' ? 0 : 1;
+                const bIR = b.country_code === 'IR' ? 0 : 1;
+                return aIR - bIR;
+            });
         }
 
         function renderSuggestions(results, query) {
+            // سورت کردن
+            results = sortResultsIranFirst(results);
+
             currentSuggestions = results;
             activeSuggestionIndex = -1;
             suggestionsEl.innerHTML = '';
@@ -2558,29 +2905,55 @@
             if (!r) return;
             hideSuggestions();
             searchInput.value = '';
-            if (cities.some(c => c.name.toLowerCase() === r.name.toLowerCase() && Math.abs(c.lat - r.latitude) < 0.01)) {
-                await updateAll();
+            // نرمالایز کردن نام (چون API ممکنه name متفاوت بده)
+            const lat = r.latitude ?? r.lat;
+            const lon = r.longitude ?? r.lon;
+            if (cities.some(c => c.name.toLowerCase() === r.name.toLowerCase() && Math.abs(c.lat - lat) < 0.01)) {
+                await updateAll(true);
                 return;
             }
             lastAddedCityName = r.name;
-            cities.push({ name: r.name, lat: r.latitude, lon: r.longitude });
+            cities.push({ name: r.name, lat, lon });
             saveCities();
-            await updateAll();
+            await updateAll(true);
         }
 
+        // ⚡ Debounce سریع‌تر
         searchInput.addEventListener('input', () => {
             const q = searchInput.value.trim();
             clearTimeout(suggestDebounce);
             if (q.length < 2) { hideSuggestions(); return; }
-            const debounceMs = device.isMobile ? 400 : 250;
-            suggestDebounce = setTimeout(async () => {
+
+            // ✨ اول جستجوی محلی (فوری)
+            const localResults = searchLocalIran(q);
+            if (localResults.length > 0) {
+                // نمایش فوری نتایج محلی
+                renderSuggestions(localResults, q);
+            } else {
                 suggestionsEl.innerHTML = '<div class="suggestions-loading">Searching…</div>';
                 suggestionsEl.classList.add('visible');
+            }
+
+            // Debounce سریع‌تر
+            const debounceMs = device.isMobile ? 150 : 100;
+            suggestDebounce = setTimeout(async () => {
                 try {
                     const results = await fetchSuggestions(q);
-                    if (searchInput.value.trim() === q) renderSuggestions(results, q);
+                    if (searchInput.value.trim() === q) {
+                        // ادغام نتایج محلی + نتایج API (بدون تکرار)
+                        const seen = new Set();
+                        const merged = [];
+                        for (const r of [...localResults, ...results]) {
+                            const key = `${r.name}|${r.latitude ?? r.lat}`.toLowerCase();
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                merged.push(r);
+                            }
+                        }
+                        renderSuggestions(merged, q);
+                    }
                 } catch (err) {
-                    if (err.name !== 'AbortError') {
+                    if (err.name !== 'AbortError' && localResults.length === 0) {
                         suggestionsEl.innerHTML = '<div class="suggestions-empty">Search failed. Try again.</div>';
                     }
                 }
@@ -2636,43 +3009,86 @@
         }
 
         // ============================================================
-        //  WEATHER FETCHING — Multi-source strategy
+        //  WEATHER FETCHING — Multi-source + Queue + Backoff
         // ============================================================
 
         async function fetchAllCitiesData(citiesList) {
             if (!citiesList || citiesList.length === 0) return [];
 
-            // Strategy 1: Open-Meteo (batch)
-            try {
-                console.log(`🌐 Trying Open-Meteo for ${citiesList.length} cities...`);
-                const batchResults = await fetchBatch(citiesList);
-                const successCount = batchResults.filter(r => r.weather && r.weather.current).length;
-                console.log(`✅ Open-Meteo: ${successCount}/${citiesList.length} successful`);
-                if (successCount > 0) {
-                    cachePut('weather-data', batchResults).catch(() => { });
-                    return batchResults;
+            // ✨ تقسیم به دو گروه: اول آب‌وهوا، بعد AQI — هرکدوم جدا
+            const weatherResults = await fetchWeatherFromBestSource(citiesList);
+            const aqiResults = await fetchAQIFromBestSource(citiesList);
+
+            return citiesList.map((city, i) => ({
+                city,
+                weather: weatherResults[i]?.weather || null,
+                aqi: aqiResults[i] ?? null
+            }));
+        }
+
+        async function fetchWeatherFromBestSource(citiesList) {
+            // 1. Open-Meteo (با Queue)
+            if (!isSourceSkipped('weather:openmeteo')) {
+                try {
+                    const results = await omQueue.add(() => fetchBatch(citiesList), 'weather-batch');
+                    const ok = results.filter(r => r.weather && r.weather.current).length;
+                    if (ok > 0) {
+                        markHealthy('weather:openmeteo');
+                        console.log(`✅ Weather: Open-Meteo (${ok}/${citiesList.length})`);
+                        cachePut('weather-data', results).catch(() => { });
+                        return results;
+                    }
+                    markUnhealthy('weather:openmeteo');
+                } catch (err) {
+                    markUnhealthy('weather:openmeteo');
+                    console.warn(`❌ Weather: Open-Meteo failed — ${err.message}`);
                 }
-            } catch (err) {
-                console.warn('❌ Open-Meteo failed:', err.message);
+            } else {
+                console.log(`⏭️ Skipping Open-Meteo weather (circuit open)`);
             }
 
-            // Strategy 2: wttr.in (fallback, per-city)
-            console.log('🔄 Falling back to wttr.in...');
-            try {
-                const wttrResults = await Promise.all(citiesList.map(city => fetchFromWttrIn(city)));
-                const successCount = wttrResults.filter(r => r.weather && r.weather.current).length;
-                console.log(`✅ wttr.in: ${successCount}/${citiesList.length} successful`);
-                if (successCount > 0) {
-                    cachePut('weather-data', wttrResults).catch(() => { });
-                    return wttrResults;
+            if (document.hidden) return citiesList.map(city => ({ city, weather: null }));
+
+            // 2. wttr.in (fallback)
+            if (!isSourceSkipped('weather:wttr')) {
+                try {
+                    console.log('🔄 Falling back to wttr.in...');
+                    const results = await Promise.all(citiesList.map(city => fetchFromWttrIn(city)));
+                    const ok = results.filter(r => r.weather && r.weather.current).length;
+                    if (ok > 0) {
+                        markHealthy('weather:wttr');
+                        console.log(`✅ Weather: wttr.in (${ok}/${citiesList.length})`);
+                        return results;
+                    }
+                    markUnhealthy('weather:wttr');
+                } catch (err) {
+                    markUnhealthy('weather:wttr');
+                    console.warn(`❌ Weather: wttr.in failed — ${err.message}`);
                 }
-            } catch (err) {
-                console.warn('❌ wttr.in failed:', err.message);
             }
 
-            // All failed
-            console.error('🚫 All data sources failed');
-            return citiesList.map(city => ({ city, weather: null, aqi: null }));
+            return citiesList.map(city => ({ city, weather: null }));
+        }
+
+        async function fetchAQIFromBestSource(citiesList) {
+            if (isSourceSkipped('aqi:openmeteo')) {
+                console.log(`⏭️ Skipping AQI (circuit open)`);
+                return citiesList.map(() => null);
+            }
+            try {
+                const results = await omQueue.add(() => fetchAQIBatch(citiesList), 'aqi-batch');
+                const ok = results.filter(v => v != null).length;
+                if (ok > 0) {
+                    markHealthy('aqi:openmeteo');
+                    console.log(`✅ AQI: Open-Meteo (${ok}/${citiesList.length})`);
+                    return results;
+                }
+                markUnhealthy('aqi:openmeteo');
+            } catch (err) {
+                markUnhealthy('aqi:openmeteo');
+                console.warn(`❌ AQI: Open-Meteo failed — ${err.message}`);
+            }
+            return citiesList.map(() => null);
         }
 
         async function fetchBatch(citiesList) {
@@ -2687,37 +3103,40 @@
             ].join('&');
 
             const weatherUrl = `${WEATHER_API}?latitude=${latParam}&longitude=${lonParam}&${weatherParams}`;
-            const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
+            const res = await fetchWithTimeout(weatherUrl, {}, 12000);
 
-            const [weatherRes, aqiRes] = await Promise.allSettled([
-                fetchWithTimeout(weatherUrl, {}, 12000),
-                fetchWithTimeout(aqiUrl, {}, 12000)
-            ]);
-
-            let weatherArr = [];
-            if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
-                try {
-                    const json = await weatherRes.value.json();
-                    weatherArr = Array.isArray(json) ? json : [json];
-                } catch (e) { console.error('Weather JSON parse failed:', e); }
+            if (res.status === 429) {
+                throw new Error('Open-Meteo rate limit (429)');
             }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-            let aqiArr = [];
-            if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
-                try {
-                    const json = await aqiRes.value.json();
-                    aqiArr = Array.isArray(json) ? json : [json];
-                } catch (e) { }
-            }
+            const json = await res.json();
+            const arr = Array.isArray(json) ? json : [json];
 
-            return citiesList.map((city, i) => ({
-                city,
-                weather: weatherArr[i] || null,
-                aqi: aqiArr[i]?.current?.european_aqi ?? null
-            }));
+            // ✨ Data Integrity Check
+            return citiesList.map((city, i) => {
+                const w = arr[i] || null;
+                if (w && !SelfHeal.isValidWeather(w)) {
+                    SelfHeal.record('invalid-weather-data', `city=${city.name}`);
+                    return { city, weather: null };
+                }
+                return { city, weather: w };
+            });
         }
 
-        // Convert wttr.in time ("06:12 AM") to ISO-like string
+        async function fetchAQIBatch(citiesList) {
+            const latParam = citiesList.map(c => c.lat).join(',');
+            const lonParam = citiesList.map(c => c.lon).join(',');
+
+            const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
+            const res = await fetchWithTimeout(aqiUrl, {}, 12000);
+            if (res.status === 429) throw new Error('AQI rate limit (429)');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            const arr = Array.isArray(json) ? json : [json];
+            return citiesList.map((_, i) => arr[i]?.current?.european_aqi ?? null);
+        }
+
         function parseWttrTime(timeStr, dateStr) {
             if (!timeStr) return null;
             const match = String(timeStr).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -2733,7 +3152,7 @@
         function parseWttrInResponse(city, data) {
             const current = data.current_condition?.[0];
             const days = data.weather || [];
-            if (!current) return { city, weather: null, aqi: null };
+            if (!current) return { city, weather: null };
 
             const weather = {
                 current: {
@@ -2759,7 +3178,7 @@
                 }
             };
 
-            return { city, weather, aqi: null };
+            return { city, weather };
         }
 
         async function fetchFromWttrIn(city) {
@@ -2770,8 +3189,7 @@
                 const data = await res.json();
                 return parseWttrInResponse(city, data);
             } catch (err) {
-                console.error(`❌ wttr.in failed for ${city.name}:`, err.message);
-                return { city, weather: null, aqi: null };
+                return { city, weather: null };
             }
         }
 
@@ -2805,7 +3223,7 @@
                 `;
                 inner.querySelector('.retry-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    updateAll();
+                    updateAll(true);
                 });
                 card.appendChild(inner);
                 return card;
@@ -2896,8 +3314,27 @@
             setTimeout(doRemove, 500);
         }
 
-        async function updateAll() {
-            if (isFetching) return;
+        async function updateAll(force = false) {
+            // Skip if hidden
+            if (document.hidden) {
+                console.log('⏸️ Skipped fetch: tab hidden');
+                return;
+            }
+            if (isFetching) {
+                console.log('⏸️ Skipped fetch: already in progress');
+                return;
+            }
+
+            // حداقل فاصله بین fetchهای خودکار
+            if (!force && lastFetchTimestamp > 0) {
+                const age = Date.now() - lastFetchTimestamp;
+                if (age < MIN_CACHE_AGE_MS) {
+                    const remainSec = Math.round((MIN_CACHE_AGE_MS - age) / 1000);
+                    console.log(`⏸️ Skipped fetch: cache fresh (${remainSec}s remaining)`);
+                    return;
+                }
+            }
+
             isFetching = true;
 
             setStatus('Refreshing…');
@@ -2906,11 +3343,18 @@
 
             try {
                 const validResults = await fetchAllCitiesData(cities);
+
+                if (document.hidden) {
+                    console.log('⏸️ Tab became hidden mid-fetch - skipping render');
+                    return;
+                }
+
                 const successCount = validResults.filter(r => r.weather && r.weather.current).length;
                 const totalCount = validResults.length;
 
                 if (successCount > 0) {
                     weatherCache = validResults;
+                    lastFetchTimestamp = Date.now();
                     saveWeatherCacheToStorage(validResults);
                     renderCards(validResults);
                     errorBanner.classList.remove('visible');
@@ -2922,7 +3366,6 @@
                         setStatus(`Partial ⚠️ (${successCount}/${totalCount})`);
                     }
                 } else {
-                    // All APIs failed → try cache
                     let cachedData = null;
                     let cacheSource = '';
 
@@ -2954,33 +3397,52 @@
                 startCountdown();
             } catch (err) {
                 console.error('Update error:', err);
-                errorBanner.classList.add('visible');
-                setStatus('Failed ❌');
+                if (!document.hidden) {
+                    errorBanner.classList.add('visible');
+                    setStatus('Failed ❌');
+                }
             } finally {
                 isFetching = false;
                 refreshBtn.classList.remove('spinning');
             }
         }
 
+        // ✨ رندر با DocumentFragment (سریع‌تر)
         function renderCards(results) {
-            cardsEl.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+            const wasFirstLoad = isFirstLoad;
+            const addedName = lastAddedCityName;
+
             results.forEach((item, index) => {
                 const card = createCard(item);
 
-                if (isFirstLoad) {
+                if (wasFirstLoad) {
                     card.style.setProperty('--stagger-delay', (index * 0.06) + 's');
-                } else if (lastAddedCityName && item.city.name === lastAddedCityName) {
+                } else if (addedName && item.city.name === addedName) {
                     card.classList.add('newly-added');
                     setTimeout(() => card.classList.remove('newly-added'), 1600);
                 } else {
                     card.classList.add('no-anim');
                 }
 
-                cardsEl.appendChild(card);
+                fragment.appendChild(card);
             });
+
+            cardsEl.innerHTML = '';
+            cardsEl.appendChild(fragment);
 
             isFirstLoad = false;
             lastAddedCityName = null;
+
+            // ✨ اسکرول خودکار روی موبایل وقتی شهر جدید اد شد
+            if (addedName && device.isMobile) {
+                setTimeout(() => {
+                    const newCard = cardsEl.querySelector('.newly-added');
+                    if (newCard) {
+                        newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
         }
 
         function startCountdown() {
@@ -2994,6 +3456,7 @@
             updateCountdownDisplay(initH, initM, initS, false);
 
             countdownTimer = setInterval(() => {
+                if (document.hidden) return;
                 const remaining = nextUpdate - Date.now();
                 if (remaining <= 0) {
                     clearInterval(countdownTimer);
@@ -3005,6 +3468,24 @@
                 const s = Math.floor((remaining % 60000) / 1000);
                 updateCountdownDisplay(h, m, s, true);
             }, 1000);
+        }
+
+        function startRefreshInterval() {
+            if (refreshIntervalTimer) clearInterval(refreshIntervalTimer);
+            refreshIntervalTimer = setInterval(() => {
+                if (document.hidden) {
+                    console.log('⏸️ Skipped auto-refresh: tab hidden');
+                    return;
+                }
+                updateAll();
+            }, REFRESH_HOURS * 3600 * 1000);
+        }
+
+        function stopRefreshInterval() {
+            if (refreshIntervalTimer) {
+                clearInterval(refreshIntervalTimer);
+                refreshIntervalTimer = null;
+            }
         }
 
         async function addCity() {
@@ -3023,7 +3504,7 @@
                 cities.push({ name: geo.name, lat: geo.lat, lon: geo.lon });
                 saveCities();
                 searchInput.value = '';
-                await updateAll();
+                await updateAll(true);
             } catch (err) {
                 alert('City not found. Please try a different name.');
             } finally {
@@ -3045,39 +3526,80 @@
                 '• iran_weather_cookie_consent — stores your cookie choice\n' +
                 '• iran_weather_theme — remembers light/dark mode\n' +
                 '• iran_weather_cities — saves your selected cities\n' +
-                '• iran_weather_cache — caches weather data for offline use\n\n' +
+                '• iran_weather_cache — caches weather data for offline use\n' +
+                '• iran_weather_search_cache — caches recent city searches\n\n' +
                 'All data stays in your browser. We do not track you.'
             );
         });
 
-        let hiddenPausedAt = 0;
+        // ============================================================
+        //  VISIBILITY MANAGEMENT
+        // ============================================================
+        let hiddenAt = 0;
+
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                hiddenPausedAt = Date.now();
+                hiddenAt = Date.now();
+                console.log('👁️ Tab hidden - pausing');
+
                 if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+                stopRefreshInterval();
+                abortAllRequests();
+                if (suggestAbort) {
+                    try { suggestAbort.abort(); } catch (e) { }
+                    suggestAbort = null;
+                }
             } else {
-                const hiddenFor = Date.now() - hiddenPausedAt;
-                if (hiddenFor > 5 * 60 * 1000) updateAll();
-                else startCountdown();
+                const hiddenFor = Date.now() - hiddenAt;
+                const hiddenMinutes = Math.round(hiddenFor / 60000);
+                console.log(`👁️ Tab visible again (hidden ${hiddenMinutes} min)`);
+
+                startRefreshInterval();
+
+                if (hiddenFor > MAX_HIDDEN_BEFORE_REFRESH_MS) {
+                    console.log('📡 Long absence - fetching fresh data');
+                    updateAll(true);
+                } else {
+                    startCountdown();
+                }
             }
         });
 
+        window.addEventListener('beforeunload', () => {
+            abortAllRequests();
+            stopRefreshInterval();
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        });
+
+        window.addEventListener('pagehide', () => {
+            abortAllRequests();
+            stopRefreshInterval();
+        });
+
+        // ============================================================
+        //  INIT
+        // ============================================================
         async function init() {
             intervalLabel.textContent = REFRESH_HOURS;
             cities = loadCities();
             initThemeFromStorage();
 
-            // Render cached data immediately if available
+            // ✨ Self-healing: چک کردن سلامت Storage
+            SelfHeal.checkStorage();
+
+            // رندر از کش فوری
             if (getConsent()) {
                 const cacheResult = await cacheGet('weather-data');
                 if (cacheResult && cacheResult.data) {
                     console.log('📦 Rendering from Cache API instantly');
                     renderCards(cacheResult.data);
+                    lastFetchTimestamp = cacheResult.cachedAt || 0;
                 } else {
                     const storageCache = loadWeatherCacheFromStorage();
                     if (storageCache && storageCache.data) {
                         console.log('📦 Rendering from localStorage instantly');
                         renderCards(storageCache.data);
+                        lastFetchTimestamp = storageCache.timestamp || 0;
                     }
                 }
             }
@@ -3086,10 +3608,32 @@
                 setTimeout(showCookieBanner, 800);
             }
 
-            updateAll();
+            if (!document.hidden) {
+                updateAll();
+            }
 
-            refreshBtn.addEventListener('click', () => updateAll());
-            setInterval(() => updateAll(), REFRESH_HOURS * 3600 * 1000);
+            startRefreshInterval();
+
+            // ✨ Watchdog: هر 5 دقیقه چک سلامت
+            watchdogTimer = setInterval(() => {
+                if (!document.hidden) SelfHeal.watchdog();
+            }, 5 * 60 * 1000);
+
+            refreshBtn.addEventListener('click', () => updateAll(true));
+
+            // ✨ API دیباگ در Console
+            window.diagnose = () => {
+                const r = SelfHeal.report();
+                console.table(r.sources);
+                console.log('Repairs:', r.repairs);
+                console.log('Last fetch:', r.lastFetch);
+                console.log('Cities:', r.citiesCount);
+                console.log('Queue:', r.queueLength);
+                console.log('Recent events:');
+                console.table(r.log);
+            };
+
+            console.log('💡 Tip: type "diagnose()" in console for health report');
         }
 
         init();
