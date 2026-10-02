@@ -1855,9 +1855,6 @@
             text-decoration: underline;
         }
 
-        /* ============================================================
-           ✨ WELCOME SCREEN — Apple-style intro
-           ============================================================ */
         .welcome-screen {
             position: fixed;
             inset: 0;
@@ -1869,11 +1866,7 @@
             overflow: hidden;
             opacity: 1;
             visibility: visible;
-            transition:
-                opacity 1s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 1s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: opacity;
-            -webkit-tap-highlight-color: transparent;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
 
@@ -1899,7 +1892,6 @@
             border-radius: 50%;
             filter: blur(60px);
             opacity: 0;
-            animation: welcomeOrbIn 2s ease forwards;
         }
 
         .welcome-orb-1 {
@@ -1953,7 +1945,6 @@
         .welcome-noise {
             position: absolute;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
             opacity: 0.05;
             mix-blend-mode: overlay;
             pointer-events: none;
@@ -2011,16 +2002,8 @@
         }
 
         @keyframes welcomeFadeScale {
-            from {
-                opacity: 0;
-                transform: scale(0.6) translateY(20px);
-                filter: blur(10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-                filter: blur(0);
-            }
+            from { opacity: 0; transform: scale(0.6) translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
 
         .welcome-title {
@@ -2033,30 +2016,15 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: transparent;
             opacity: 0;
             animation: welcomeTitleIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
-            transform-origin: center;
-            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
         }
 
-        .welcome-title-line {
-            display: inline-block;
-        }
+        .welcome-title-line { display: inline-block; }
 
         @keyframes welcomeTitleIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-                filter: blur(15px);
-                letter-spacing: 0.1em;
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-                letter-spacing: -0.03em;
-            }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); filter: blur(15px); letter-spacing: 0.1em; }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); letter-spacing: -0.03em; }
         }
 
         .welcome-subtitle {
@@ -2070,14 +2038,8 @@
         }
 
         @keyframes welcomeSubIn {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .welcome-divider {
@@ -2152,25 +2114,9 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .welcome-orb,
-            .welcome-icon,
-            .welcome-icon-glow,
-            .welcome-hint-dot {
-                animation: none !important;
-            }
-            .welcome-title,
-            .welcome-subtitle,
-            .welcome-divider,
-            .welcome-loader,
-            .welcome-hint,
-            .welcome-icon-wrap {
-                animation-duration: 0.4s !important;
-                animation-delay: 0s !important;
-            }
-            .welcome-loader-fill {
-                animation-duration: 0.6s !important;
-                animation-delay: 0.2s !important;
-            }
+            .welcome-orb, .welcome-icon, .welcome-icon-glow, .welcome-hint-dot { animation: none !important; }
+            .welcome-title, .welcome-subtitle, .welcome-divider, .welcome-loader, .welcome-hint, .welcome-icon-wrap { animation-duration: 0.4s !important; animation-delay: 0s !important; }
+            .welcome-loader-fill { animation-duration: 0.6s !important; animation-delay: 0.2s !important; }
         }
 
         @media (max-width: 480px) {
@@ -2181,408 +2127,112 @@
         }
 
         @media (min-width: 1600px) {
-            .app {
-                max-width: 1700px;
-            }
-
-            .cards {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 1.25rem;
-            }
+            .app { max-width: 1700px; }
+            .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
         }
 
         @media (min-width: 1280px) and (max-width: 1599px) {
-            .cards {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 1.1rem;
-            }
+            .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.1rem; }
         }
 
         @media (min-width: 1024px) and (max-width: 1279px) {
-            .cards {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 1rem;
-            }
+            .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
         }
 
         @media (min-width: 768px) and (max-width: 1023px) {
-            .cards {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 0.9rem;
-            }
+            .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
         }
 
         @media (min-width: 601px) and (max-width: 767px) {
-            .cards {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 1rem;
-            }
+            .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
         }
 
         @media (min-width: 481px) and (max-width: 600px) {
-            body {
-                padding: 0.75rem;
-                padding-top: calc(0.75rem + env(safe-area-inset-top));
-                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-            }
-
-            .app {
-                gap: 0.75rem;
-            }
-
-            .header {
-                padding: 0.9rem 1rem;
-            }
-
-            .title h1 {
-                font-size: 1.05rem;
-            }
-
-            .sub {
-                font-size: 0.7rem;
-            }
-
-            .icon-btn {
-                width: 42px;
-                height: 42px;
-                min-width: 42px;
-                font-size: 1.15rem;
-            }
-
-            .card {
-                padding: 1rem;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-                gap: 1.25rem;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .submit-btn {
-                align-self: stretch;
-                width: 100%;
-            }
-
-            .cookie-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .cookie-actions {
-                flex-direction: column;
-            }
-
-            .cookie-btn {
-                width: 100%;
-            }
+            body { padding: 0.75rem; padding-top: calc(0.75rem + env(safe-area-inset-top)); padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }
+            .app { gap: 0.75rem; }
+            .header { padding: 0.9rem 1rem; }
+            .title h1 { font-size: 1.05rem; }
+            .sub { font-size: 0.7rem; }
+            .icon-btn { width: 42px; height: 42px; min-width: 42px; font-size: 1.15rem; }
+            .card { padding: 1rem; }
+            .cards { grid-template-columns: 1fr; gap: 1.25rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .submit-btn { align-self: stretch; width: 100%; }
+            .cookie-content { flex-direction: column; align-items: stretch; }
+            .cookie-actions { flex-direction: column; }
+            .cookie-btn { width: 100%; }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 0.65rem;
-                padding-top: calc(0.65rem + env(safe-area-inset-top));
-                padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
-            }
-
-            .app {
-                gap: 0.65rem;
-            }
-
-            .header {
-                padding: 0.85rem 0.9rem;
-                gap: 0.5rem;
-            }
-
-            .title h1 {
-                font-size: 1rem;
-            }
-
-            .sub {
-                font-size: 0.68rem;
-            }
-
-            .status {
-                font-size: 0.65rem;
-            }
-
-            .icon-btn {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
-                font-size: 1.1rem;
-            }
-
-            .card {
-                padding: 1rem;
-                gap: 0.6rem;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-                gap: 1.25rem;
-            }
-
-            .card-header {
-                padding-right: 2rem;
-                min-height: 30px;
-            }
-
-            .remove-city-btn {
-                width: 26px;
-                height: 26px;
-                font-size: 0.85rem;
-                top: 0.45rem;
-                right: 0.45rem;
-            }
-
-            .forecast-day {
-                padding: 0.45rem 0.15rem;
-                border-radius: 10px;
-                gap: 0.2rem;
-            }
-
-            .forecast-day .day-label {
-                font-size: 0.6rem;
-            }
-
-            .forecast-day .day-icon {
-                font-size: 1rem;
-            }
-
-            .forecast-day .day-temp {
-                font-size: 0.6rem;
-            }
-
-            .suggestions {
-                max-height: 220px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0.7rem;
-            }
-
-            .submit-btn {
-                align-self: stretch;
-                width: 100%;
-            }
-
-            .cookie-content {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.85rem;
-            }
-
-            .cookie-actions {
-                flex-direction: column;
-            }
-
-            .cookie-btn {
-                width: 100%;
-            }
-
-            .feedback-toggle {
-                padding: 0.9rem 1rem;
-                min-height: 56px;
-            }
-
-            .feedback-toggle-title {
-                font-size: 0.95rem;
-            }
-
-            .feedback-toggle-sub {
-                font-size: 0.7rem;
-            }
-
-            .feedback-inner {
-                padding: 1rem 1rem 1.25rem;
-                gap: 0.85rem;
-            }
-
-            .telegram-section {
-                padding: 0.9rem 1rem;
-                min-height: 56px;
-            }
-
-            .telegram-icon {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
-            }
-
-            .telegram-title {
-                font-size: 0.95rem;
-            }
-
-            .telegram-sub {
-                font-size: 0.7rem;
-            }
-
-            .footer {
-                font-size: 0.68rem;
-                gap: 0.4rem 0.5rem;
-            }
-
-            #countdown .cd-digit {
-                width: 0.7em;
-                height: 1.2em;
-                font-size: 1.05em;
-                line-height: 1.2em;
-            }
-
-            .weather-disclaimer {
-                padding: 0.65rem 0.8rem;
-                font-size: 0.7rem;
-                gap: 0.5rem;
-            }
-
-            .weather-disclaimer .disclaimer-icon {
-                font-size: 0.9rem;
-            }
+            body { padding: 0.65rem; padding-top: calc(0.65rem + env(safe-area-inset-top)); padding-bottom: calc(0.65rem + env(safe-area-inset-bottom)); }
+            .app { gap: 0.65rem; }
+            .header { padding: 0.85rem 0.9rem; gap: 0.5rem; }
+            .title h1 { font-size: 1rem; }
+            .sub { font-size: 0.68rem; }
+            .status { font-size: 0.65rem; }
+            .icon-btn { width: 40px; height: 40px; min-width: 40px; font-size: 1.1rem; }
+            .card { padding: 1rem; gap: 0.6rem; }
+            .cards { grid-template-columns: 1fr; gap: 1.25rem; }
+            .card-header { padding-right: 2rem; min-height: 30px; }
+            .remove-city-btn { width: 26px; height: 26px; font-size: 0.85rem; top: 0.45rem; right: 0.45rem; }
+            .forecast-day { padding: 0.45rem 0.15rem; border-radius: 10px; gap: 0.2rem; }
+            .forecast-day .day-label { font-size: 0.6rem; }
+            .forecast-day .day-icon { font-size: 1rem; }
+            .forecast-day .day-temp { font-size: 0.6rem; }
+            .suggestions { max-height: 220px; }
+            .form-row { grid-template-columns: 1fr; gap: 0.7rem; }
+            .submit-btn { align-self: stretch; width: 100%; }
+            .cookie-content { flex-direction: column; align-items: stretch; gap: 0.85rem; }
+            .cookie-actions { flex-direction: column; }
+            .cookie-btn { width: 100%; }
+            .feedback-toggle { padding: 0.9rem 1rem; min-height: 56px; }
+            .feedback-toggle-title { font-size: 0.95rem; }
+            .feedback-toggle-sub { font-size: 0.7rem; }
+            .feedback-inner { padding: 1rem 1rem 1.25rem; gap: 0.85rem; }
+            .telegram-section { padding: 0.9rem 1rem; min-height: 56px; }
+            .telegram-icon { width: 34px; height: 34px; min-width: 34px; }
+            .telegram-title { font-size: 0.95rem; }
+            .telegram-sub { font-size: 0.7rem; }
+            .footer { font-size: 0.68rem; gap: 0.4rem 0.5rem; }
+            #countdown .cd-digit { width: 0.7em; height: 1.2em; font-size: 1.05em; line-height: 1.2em; }
+            .weather-disclaimer { padding: 0.65rem 0.8rem; font-size: 0.7rem; gap: 0.5rem; }
+            .weather-disclaimer .disclaimer-icon { font-size: 0.9rem; }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
-            body {
-                padding: 0.5rem;
-            }
-
-            .app {
-                gap: 0.5rem;
-            }
-
-            .header {
-                padding: 0.6rem 0.85rem;
-            }
-
-            .card {
-                padding: 0.75rem;
-            }
-
-            .suggestions {
-                max-height: 60vh;
-            }
+            body { padding: 0.5rem; }
+            .app { gap: 0.5rem; }
+            .header { padding: 0.6rem 0.85rem; }
+            .card { padding: 0.75rem; }
+            .suggestions { max-height: 60vh; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-
-            .ambient-bg {
-                display: none;
-            }
-
-            .weather-icon {
-                animation: none;
-            }
-
-            .title h1 .title-icon {
-                animation: none;
-            }
-
-            #refreshBtn {
-                animation: none;
-            }
-
-            .live-dot::after {
-                display: none;
-            }
-
-            .cookie-icon {
-                animation: none;
-            }
-
-            .feedback-toggle-icon {
-                animation: none;
-            }
-
-            .telegram-icon {
-                animation: none;
-            }
-
-            .header::after {
-                animation: none;
-                opacity: 0;
-            }
-
-            .disclaimer-icon {
-                animation: none;
-            }
-
-            .aqi-badge {
-                animation: none;
-            }
-
-            .cd-sep {
-                animation: none;
-                opacity: 0.7;
-            }
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            .ambient-bg, .weather-icon, .title h1 .title-icon, #refreshBtn, .live-dot::after, .cookie-icon, .feedback-toggle-icon, .telegram-icon, .disclaimer-icon, .aqi-badge, .cd-sep { animation: none; }
+            .header::after { animation: none; opacity: 0; }
         }
 
-        body[data-low-battery="true"] .ambient-bg {
-            display: none;
-        }
-
-        body[data-low-battery="true"] .weather-icon {
-            animation: none;
-        }
-
-        body[data-low-battery="true"] .live-dot::after {
-            display: none;
-        }
-
-        body[data-low-battery="true"] .header::after {
-            animation: none;
-            opacity: 0;
-        }
-
-        body[data-low-battery="true"] #refreshBtn {
-            animation: none;
-        }
-
-        body[data-low-battery="true"] .telegram-icon {
-            animation: none;
-        }
-
-        body[data-low-battery="true"] .aqi-badge {
-            animation: none;
-        }
+        body[data-low-battery="true"] .ambient-bg,
+        body[data-low-battery="true"] .weather-icon,
+        body[data-low-battery="true"] .live-dot::after,
+        body[data-low-battery="true"] #refreshBtn,
+        body[data-low-battery="true"] .telegram-icon,
+        body[data-low-battery="true"] .aqi-badge { animation: none; display: none; }
+        body[data-low-battery="true"] .weather-icon { display: inline-block; }
+        body[data-low-battery="true"] .header::after { animation: none; opacity: 0; }
 
         @media (max-width: 600px) {
-            .ambient-orb {
-                opacity: 0.5;
-            }
-
-            .orb-1 {
-                width: 300px;
-                height: 300px;
-            }
-
-            .orb-2 {
-                width: 340px;
-                height: 340px;
-            }
-
-            .orb-3 {
-                width: 240px;
-                height: 240px;
-            }
+            .ambient-orb { opacity: 0.5; }
+            .orb-1 { width: 300px; height: 300px; }
+            .orb-2 { width: 340px; height: 340px; }
+            .orb-3 { width: 240px; height: 240px; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ✨ Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen" aria-hidden="true">
         <div class="welcome-bg" aria-hidden="true">
             <div class="welcome-orb welcome-orb-1"></div>
@@ -2623,8 +2273,7 @@
         <header class="header">
             <div class="title">
                 <h1><span class="title-icon" aria-hidden="true">🌤️</span> Weather & Air Quality</h1>
-                <p class="sub">Auto refresh every <span id="intervalLabel">1</span> hour • <span
-                        id="lastUpdate">—</span></p>
+                <p class="sub">Auto refresh every <span id="intervalLabel">1</span> hour • <span id="lastUpdate">—</span></p>
             </div>
             <div class="actions">
                 <span id="status" class="status">
@@ -2638,8 +2287,7 @@
 
         <div class="search-wrapper">
             <div class="search-box">
-                <input type="text" id="citySearch" placeholder="Add a city… (e.g. Tehran, Mashhad, Shiraz)"
-                    autocomplete="off" spellcheck="false">
+                <input type="text" id="citySearch" placeholder="Add a city… (e.g. Tehran, Mashhad, Shiraz)" autocomplete="off" spellcheck="false">
                 <button id="addCityBtn">Add</button>
             </div>
             <div id="suggestions" class="suggestions"></div>
@@ -2657,15 +2305,12 @@
             </p>
         </div>
 
-        <a href="https://t.me/amirmohamad_Ahvaz" target="_blank" rel="noopener noreferrer" class="telegram-section"
-            aria-label="Contact me on Telegram">
+        <a href="https://t.me/amirmohamad_Ahvaz" target="_blank" rel="noopener noreferrer" class="telegram-section" aria-label="Contact me on Telegram">
             <span class="telegram-content">
                 <span class="telegram-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="12" fill="#229ED9" />
-                        <path
-                            d="M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3-2.211-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953z"
-                            fill="#fff" />
+                        <path d="M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3-2.211-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953z" fill="#fff" />
                     </svg>
                 </span>
                 <span class="telegram-text">
@@ -2690,8 +2335,7 @@
 
             <div class="feedback-body" id="feedbackBody">
                 <div class="feedback-inner">
-                    <form class="feedback-form" id="feedbackForm"
-                        action="https://formsubmit.co/amirmohamad.hodaei2010@gmail.com" method="POST" novalidate>
+                    <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/amirmohamad.hodaei2010@gmail.com" method="POST" novalidate>
                         <input type="hidden" name="_subject" value="Weather Site Feedback">
                         <input type="hidden" name="_captcha" value="false">
                         <input type="hidden" name="_template" value="table">
@@ -2706,8 +2350,7 @@
                             <div class="form-group" id="group-email">
                                 <label for="fb-email">Your email</label>
                                 <div class="email-input-wrapper">
-                                    <input type="email" id="fb-email" name="email" placeholder="you@example.com"
-                                        autocomplete="email" inputmode="email" spellcheck="false">
+                                    <input type="email" id="fb-email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" spellcheck="false">
                                     <span class="email-indicator" id="emailIndicator"></span>
                                 </div>
                                 <div class="email-validation-message" id="emailMessage"></div>
@@ -2717,8 +2360,7 @@
 
                         <div class="form-group" id="group-message">
                             <label for="fb-message">Your message</label>
-                            <textarea id="fb-message" name="message"
-                                placeholder="Write your suggestion or criticism here…"></textarea>
+                            <textarea id="fb-message" name="message" placeholder="Write your suggestion or criticism here…"></textarea>
                             <div class="form-error" id="error-message">Please write your message.</div>
                         </div>
 
@@ -2768,11 +2410,11 @@
 
     <script>
         // ============================================================
-        //  WELCOME SCREEN — Apple-style intro
+        //  WELCOME SCREEN
         // ============================================================
         const WELCOME_KEY = 'welcome_shown_v1';
-        const WELCOME_TOTAL_DURATION = 3400;  // ms — total time before fade starts
-        const WELCOME_FADE_DURATION = 1000;   // ms — matches CSS transition
+        const WELCOME_TOTAL_DURATION = 3400;
+        const WELCOME_FADE_DURATION = 1000;
 
         function initWelcomeScreen() {
             const welcomeEl = document.getElementById('welcomeScreen');
@@ -2780,8 +2422,7 @@
 
             let alreadyShown = false;
             try {
-                alreadyShown = localStorage.getItem(WELCOME_KEY) === '1' ||
-                               sessionStorage.getItem(WELCOME_KEY) === '1';
+                alreadyShown = localStorage.getItem(WELCOME_KEY) === '1' || sessionStorage.getItem(WELCOME_KEY) === '1';
             } catch (e) { }
 
             if (alreadyShown) {
@@ -2811,7 +2452,6 @@
             welcomeEl.addEventListener('touchstart', finish, { passive: true });
         }
 
-        // Run immediately
         initWelcomeScreen();
 
         // ============================================================
@@ -2886,6 +2526,7 @@
         const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
         const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
         const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+        const WTTR_API = 'https://wttr.in';
         const FETCH_TIMEOUT_MS = 15000;
 
         const COOKIE_CONSENT_KEY = 'iran_weather_cookie_consent';
@@ -2898,7 +2539,6 @@
         const CACHE_NAME = 'iran-weather-cache-v1';
         const CACHE_API_PREFIX = 'api-cache:';
 
-        // ✅ فقط تهران به عنوان شهر پیش‌فرض
         const DEFAULT_CITIES = [
             { name: 'Tehran', lat: 35.6892, lon: 51.3890 }
         ];
@@ -2934,6 +2574,28 @@
             99: { desc: 'Thunderstorm w/ heavy hail', icon: '⛈️' }
         };
 
+        // ✅ WWW weather code (wttr.in) -> WMO weather code mapping
+        const WWW_TO_WMO = {
+            113: 0, 116: 2, 119: 3, 122: 3,
+            143: 45, 248: 45, 260: 48,
+            176: 80, 179: 71, 182: 56, 185: 56,
+            200: 95, 227: 71, 230: 75,
+            263: 51, 266: 53, 281: 56, 284: 57,
+            293: 61, 296: 61, 299: 63, 302: 63,
+            305: 65, 308: 65, 311: 66, 314: 67,
+            317: 71, 320: 73, 323: 71, 326: 71,
+            329: 73, 332: 73, 335: 75, 338: 75,
+            350: 77,
+            353: 80, 356: 81, 359: 82,
+            362: 85, 365: 86, 368: 85, 371: 86,
+            374: 85, 377: 86,
+            386: 95, 389: 96, 392: 95, 395: 99
+        };
+
+        function convertWwwToWmo(wwwCode) {
+            return WWW_TO_WMO[parseInt(wwwCode)] ?? 0;
+        }
+
         function fetchWithTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
             return new Promise((resolve, reject) => {
                 const controller = new AbortController();
@@ -2951,7 +2613,6 @@
             try { return typeof caches !== 'undefined' && caches !== null; }
             catch (e) { return false; }
         })();
-        console.log(`💾 Cache API supported: ${cacheSupported}`);
 
         async function cachePut(key, data) {
             if (!cacheSupported) return;
@@ -2973,16 +2634,7 @@
                 const cachedAt = parseInt(response.headers.get('X-Cached-At') || '0', 10);
                 const data = await response.json();
                 return { data, cachedAt };
-            } catch (e) {
-                return null;
-            }
-        }
-
-        async function cacheClear() {
-            if (!cacheSupported) return;
-            try {
-                await caches.delete(CACHE_NAME);
-            } catch (e) { }
+            } catch (e) { return null; }
         }
 
         const memoryStore = Object.create(null);
@@ -3017,8 +2669,6 @@
             } catch (e) { return false; }
         })();
 
-        console.log(`🍪 Cookies: ${cookiesEnabled} | 💾 localStorage: ${localStorageEnabled} | 📦 sessionStorage: ${sessionStorageEnabled}`);
-
         function setCookie(name, value, days = COOKIE_DAYS) {
             if (!cookiesEnabled) return;
             try {
@@ -3037,26 +2687,14 @@
 
         function deleteCookie(name) {
             if (!cookiesEnabled) return;
-            try {
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
-            } catch (e) { }
+            try { document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`; } catch (e) { }
         }
 
         function storeGet(key) {
             const c = getCookie(key);
             if (c !== null && c !== '') return c;
-            if (localStorageEnabled) {
-                try {
-                    const ls = localStorage.getItem(key);
-                    if (ls !== null && ls !== '') return ls;
-                } catch (e) { }
-            }
-            if (sessionStorageEnabled) {
-                try {
-                    const ss = sessionStorage.getItem(key);
-                    if (ss !== null && ss !== '') return ss;
-                } catch (e) { }
-            }
+            if (localStorageEnabled) { try { const ls = localStorage.getItem(key); if (ls !== null && ls !== '') return ls; } catch (e) { } }
+            if (sessionStorageEnabled) { try { const ss = sessionStorage.getItem(key); if (ss !== null && ss !== '') return ss; } catch (e) { } }
             if (key in memoryStore) return memoryStore[key];
             return null;
         }
@@ -3064,23 +2702,15 @@
         function storeSet(key, value, days = COOKIE_DAYS) {
             memoryStore[key] = value;
             setCookie(key, value, days);
-            if (localStorageEnabled) {
-                try { localStorage.setItem(key, value); } catch (e) { }
-            }
-            if (sessionStorageEnabled) {
-                try { sessionStorage.setItem(key, value); } catch (e) { }
-            }
+            if (localStorageEnabled) { try { localStorage.setItem(key, value); } catch (e) { } }
+            if (sessionStorageEnabled) { try { sessionStorage.setItem(key, value); } catch (e) { } }
         }
 
         function storeDelete(key) {
             delete memoryStore[key];
             deleteCookie(key);
-            if (localStorageEnabled) {
-                try { localStorage.removeItem(key); } catch (e) { }
-            }
-            if (sessionStorageEnabled) {
-                try { sessionStorage.removeItem(key); } catch (e) { }
-            }
+            if (localStorageEnabled) { try { localStorage.removeItem(key); } catch (e) { } }
+            if (sessionStorageEnabled) { try { sessionStorage.removeItem(key); } catch (e) { } }
         }
 
         function getConsent() {
@@ -3102,11 +2732,7 @@
             banner.classList.remove('visible');
             setTimeout(() => { banner.style.display = 'none'; }, 400);
         }
-        function acceptCookies() {
-            setConsent('accepted');
-            hideCookieBanner();
-            persistAll();
-        }
+        function acceptCookies() { setConsent('accepted'); hideCookieBanner(); persistAll(); }
         function rejectCookies() {
             setConsent('rejected');
             storeDelete(COOKIE_THEME_KEY);
@@ -3114,14 +2740,10 @@
             storeDelete(COOKIE_CACHE_KEY);
             hideCookieBanner();
         }
-        function resetCookieConsent() {
-            storeDelete(COOKIE_CONSENT_KEY);
-            setTimeout(showCookieBanner, 100);
-        }
+        function resetCookieConsent() { storeDelete(COOKIE_CONSENT_KEY); setTimeout(showCookieBanner, 100); }
 
         let cities = [...DEFAULT_CITIES];
         let weatherCache = null;
-
         let isFirstLoad = true;
         let lastAddedCityName = null;
 
@@ -3179,7 +2801,7 @@
                         sunset: r.weather.daily.sunset
                     } : null
                 }));
-                storeSet(COOKIE_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: compact }), 1);
+                storeSet(COOKIE_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: compact }), 7);
             } catch (e) { }
         }
 
@@ -3226,11 +2848,8 @@
         const suggestionsEl = $('suggestions');
 
         function setStatus(text) {
-            if (statusTextEl) {
-                statusTextEl.textContent = text;
-            } else {
-                statusEl.textContent = text;
-            }
+            if (statusTextEl) statusTextEl.textContent = text;
+            else statusEl.textContent = text;
         }
 
         const countdownDigitEls = {
@@ -3247,26 +2866,13 @@
             const el = countdownDigitEls[key];
             if (!el) return;
             if (el.textContent === value) return;
-
-            if (!animate) {
-                el.textContent = value;
-                el.classList.remove('flipping');
-                return;
-            }
-
+            if (!animate) { el.textContent = value; el.classList.remove('flipping'); return; }
             if (digitTimers[key]) clearTimeout(digitTimers[key]);
-
             el.classList.remove('flipping');
             void el.offsetWidth;
             el.classList.add('flipping');
-
-            digitTimers[key] = setTimeout(() => {
-                el.textContent = value;
-            }, 180);
-
-            el.addEventListener('animationend', () => {
-                el.classList.remove('flipping');
-            }, { once: true });
+            digitTimers[key] = setTimeout(() => { el.textContent = value; }, 180);
+            el.addEventListener('animationend', () => { el.classList.remove('flipping'); }, { once: true });
         }
 
         function updateCountdownDisplay(h, m, s, animate = true) {
@@ -3303,10 +2909,10 @@
 
         function flagEmoji(code) {
             if (!code || code.length !== 2) return '🌍';
-            try {
-                return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
-            } catch (e) { return '🌍'; }
+            try { return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)); }
+            catch (e) { return '🌍'; }
         }
+
         function getAQICat(aqi) {
             if (aqi <= 20) return { label: 'Good', color: 'var(--aqi-good)', icon: '🟢' };
             if (aqi <= 40) return { label: 'Fair', color: 'var(--aqi-fair)', icon: '🟡' };
@@ -3315,6 +2921,7 @@
             if (aqi <= 100) return { label: 'Very Poor', color: 'var(--aqi-very-poor)', icon: '🟣' };
             return { label: 'Hazardous', color: 'var(--aqi-hazardous)', icon: '⚫' };
         }
+
         function fmtTime(isoString) {
             try { return new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }); }
             catch (e) { return '—'; }
@@ -3350,15 +2957,15 @@
                 const admin = r.admin1 || r.admin2 || '';
                 const country = r.country || '';
                 item.innerHTML = `
-          <div class="suggestion-left">
-            <span class="suggestion-flag">${flagEmoji(r.country_code)}</span>
-            <div style="min-width:0;flex:1;">
-              <div class="suggestion-name">${r.name}</div>
-              ${admin ? `<div class="suggestion-admin">${admin}</div>` : ''}
-            </div>
-          </div>
-          ${country ? `<span class="suggestion-country">${country}</span>` : ''}
-        `;
+                    <div class="suggestion-left">
+                        <span class="suggestion-flag">${flagEmoji(r.country_code)}</span>
+                        <div style="min-width:0;flex:1;">
+                            <div class="suggestion-name">${r.name}</div>
+                            ${admin ? `<div class="suggestion-admin">${admin}</div>` : ''}
+                        </div>
+                    </div>
+                    ${country ? `<span class="suggestion-country">${country}</span>` : ''}
+                `;
                 item.addEventListener('mousedown', (e) => { e.preventDefault(); selectSuggestion(index); });
                 item.addEventListener('touchstart', (e) => { e.preventDefault(); selectSuggestion(index); }, { passive: false });
                 suggestionsEl.appendChild(item);
@@ -3463,45 +3070,44 @@
             return { name: r.name, lat: r.latitude, lon: r.longitude, country: r.country_code };
         }
 
+        // ============================================================
+        //  WEATHER FETCHING — Multi-source strategy
+        // ============================================================
+
         async function fetchAllCitiesData(citiesList) {
             if (!citiesList || citiesList.length === 0) return [];
 
+            // Strategy 1: Open-Meteo (batch)
             try {
-                console.log(`🌐 Batch request for ${citiesList.length} cities...`);
+                console.log(`🌐 Trying Open-Meteo for ${citiesList.length} cities...`);
                 const batchResults = await fetchBatch(citiesList);
                 const successCount = batchResults.filter(r => r.weather && r.weather.current).length;
-                console.log(`✅ Batch result: ${successCount}/${citiesList.length} successful`);
-
+                console.log(`✅ Open-Meteo: ${successCount}/${citiesList.length} successful`);
                 if (successCount > 0) {
                     cachePut('weather-data', batchResults).catch(() => { });
                     return batchResults;
                 }
             } catch (err) {
-                console.warn('❌ Batch request failed:', err.message);
+                console.warn('❌ Open-Meteo failed:', err.message);
             }
 
-            console.log('🔄 Falling back to individual city requests...');
-            const results = [];
-            const GROUP_SIZE = 5;
-
-            for (let i = 0; i < citiesList.length; i += GROUP_SIZE) {
-                const group = citiesList.slice(i, i + GROUP_SIZE);
-                const groupResults = await Promise.all(group.map(city => fetchSingleCity(city)));
-                results.push(...groupResults);
-
-                if (i + GROUP_SIZE < citiesList.length) {
-                    await new Promise(r => setTimeout(r, 250));
+            // Strategy 2: wttr.in (fallback, per-city)
+            console.log('🔄 Falling back to wttr.in...');
+            try {
+                const wttrResults = await Promise.all(citiesList.map(city => fetchFromWttrIn(city)));
+                const successCount = wttrResults.filter(r => r.weather && r.weather.current).length;
+                console.log(`✅ wttr.in: ${successCount}/${citiesList.length} successful`);
+                if (successCount > 0) {
+                    cachePut('weather-data', wttrResults).catch(() => { });
+                    return wttrResults;
                 }
+            } catch (err) {
+                console.warn('❌ wttr.in failed:', err.message);
             }
 
-            const successCount = results.filter(r => r.weather && r.weather.current).length;
-            console.log(`✅ Individual result: ${successCount}/${citiesList.length} successful`);
-
-            if (successCount > 0) {
-                cachePut('weather-data', results).catch(() => { });
-            }
-
-            return results;
+            // All failed
+            console.error('🚫 All data sources failed');
+            return citiesList.map(city => ({ city, weather: null, aqi: null }));
         }
 
         async function fetchBatch(citiesList) {
@@ -3519,8 +3125,8 @@
             const aqiUrl = `${AQI_API}?latitude=${latParam}&longitude=${lonParam}&current=european_aqi,pm2_5,pm10&timezone=auto`;
 
             const [weatherRes, aqiRes] = await Promise.allSettled([
-                fetchWithTimeout(weatherUrl, {}, 15000),
-                fetchWithTimeout(aqiUrl, {}, 15000)
+                fetchWithTimeout(weatherUrl, {}, 12000),
+                fetchWithTimeout(aqiUrl, {}, 12000)
             ]);
 
             let weatherArr = [];
@@ -3528,11 +3134,7 @@
                 try {
                     const json = await weatherRes.value.json();
                     weatherArr = Array.isArray(json) ? json : [json];
-                } catch (e) {
-                    console.error('Weather JSON parse failed:', e);
-                }
-            } else {
-                console.error('Weather batch failed:', weatherRes.reason || weatherRes.value?.status);
+                } catch (e) { console.error('Weather JSON parse failed:', e); }
             }
 
             let aqiArr = [];
@@ -3540,9 +3142,7 @@
                 try {
                     const json = await aqiRes.value.json();
                     aqiArr = Array.isArray(json) ? json : [json];
-                } catch (e) {
-                    console.error('AQI JSON parse failed:', e);
-                }
+                } catch (e) { }
             }
 
             return citiesList.map((city, i) => ({
@@ -3552,39 +3152,60 @@
             }));
         }
 
-        async function fetchSingleCity(city) {
+        // ✅ Convert wttr.in time ("06:12 AM") to ISO-like string
+        function parseWttrTime(timeStr, dateStr) {
+            if (!timeStr) return null;
+            const match = String(timeStr).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            if (!match) return null;
+            let hours = parseInt(match[1]);
+            const minutes = match[2];
+            const period = match[3].toUpperCase();
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            return `${dateStr}T${String(hours).padStart(2, '0')}:${minutes}:00`;
+        }
+
+        function parseWttrInResponse(city, data) {
+            const current = data.current_condition?.[0];
+            const days = data.weather || [];
+            if (!current) return { city, weather: null, aqi: null };
+
+            const weather = {
+                current: {
+                    temperature_2m: parseFloat(current.temp_C) || 0,
+                    apparent_temperature: parseFloat(current.FeelsLikeC || current.temp_C) || 0,
+                    relative_humidity_2m: parseInt(current.humidity) || 0,
+                    weather_code: convertWwwToWmo(current.weatherCode),
+                    wind_speed_10m: parseFloat(current.windspeedKmph) || 0,
+                    wind_direction_10m: parseInt(current.winddirDegree) || 0,
+                    pressure_msl: parseFloat(current.pressure) || 0,
+                    visibility: (parseFloat(current.visibility) || 0) * 1000,
+                    dew_point_2m: parseFloat(current.DewPointC) || 0,
+                    uv_index: parseFloat(current.uvIndex) || 0
+                },
+                daily: {
+                    time: days.map(d => d.date),
+                    weather_code: days.map(d => convertWwwToWmo(d.hourly?.[4]?.weatherCode || d.hourly?.[0]?.weatherCode || 113)),
+                    temperature_2m_max: days.map(d => parseFloat(d.maxtempC) || 0),
+                    temperature_2m_min: days.map(d => parseFloat(d.mintempC) || 0),
+                    precipitation_probability_max: days.map(d => parseInt(d.hourly?.[4]?.chanceofrain || 0)),
+                    sunrise: days.map(d => parseWttrTime(d.astronomy?.[0]?.sunrise, d.date)),
+                    sunset: days.map(d => parseWttrTime(d.astronomy?.[0]?.sunset, d.date))
+                }
+            };
+
+            return { city, weather, aqi: null };
+        }
+
+        async function fetchFromWttrIn(city) {
             try {
-                const weatherParams = [
-                    'current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dew_point_2m',
-                    'daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
-                    'timezone=auto',
-                    'forecast_days=7'
-                ].join('&');
-
-                const weatherUrl = `${WEATHER_API}?latitude=${city.lat}&longitude=${city.lon}&${weatherParams}`;
-                const aqiUrl = `${AQI_API}?latitude=${city.lat}&longitude=${city.lon}&current=european_aqi,pm2_5,pm10&timezone=auto`;
-
-                const [weatherRes, aqiRes] = await Promise.allSettled([
-                    fetchWithTimeout(weatherUrl, {}, 12000),
-                    fetchWithTimeout(aqiUrl, {}, 12000)
-                ]);
-
-                let weather = null;
-                if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
-                    try { weather = await weatherRes.value.json(); } catch (e) { }
-                }
-
-                let aqi = null;
-                if (aqiRes.status === 'fulfilled' && aqiRes.value.ok) {
-                    try {
-                        const aqiJson = await aqiRes.value.json();
-                        aqi = aqiJson?.current?.european_aqi ?? null;
-                    } catch (e) { }
-                }
-
-                return { city, weather, aqi };
+                const url = `${WTTR_API}/${encodeURIComponent(city.name)}?format=j1`;
+                const res = await fetchWithTimeout(url, {}, 12000);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                return parseWttrInResponse(city, data);
             } catch (err) {
-                console.error(`Failed ${city.name}:`, err);
+                console.error(`❌ wttr.in failed for ${city.name}:`, err.message);
                 return { city, weather: null, aqi: null };
             }
         }
@@ -3609,14 +3230,14 @@
                 card.classList.add('error-card');
                 const inner = document.createElement('div');
                 inner.innerHTML = `
-          <div class="card-header">
-            <span class="city-name">${city.name}</span>
-            <span class="weather-icon">⚠️</span>
-          </div>
-          <div class="temp-main">No data</div>
-          <div class="weather-desc">Fetch failed</div>
-          <button class="retry-btn">Retry</button>
-        `;
+                    <div class="card-header">
+                        <span class="city-name">${city.name}</span>
+                        <span class="weather-icon">⚠️</span>
+                    </div>
+                    <div class="temp-main">No data</div>
+                    <div class="weather-desc">Fetch failed</div>
+                    <button class="retry-btn">Retry</button>
+                `;
                 inner.querySelector('.retry-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     updateAll();
@@ -3635,7 +3256,7 @@
             const pressure = Math.round(c.pressure_msl);
             const visibility = c.visibility != null ? (c.visibility / 1000).toFixed(1) : '—';
             const dew = c.dew_point_2m != null ? Math.round(c.dew_point_2m) : '—';
-            const uv = c.uv_index != null ? c.uv_index.toFixed(1) : '—';
+            const uv = c.uv_index != null ? (typeof c.uv_index === 'number' ? c.uv_index.toFixed(1) : c.uv_index) : '—';
             const precipProb = d.precipitation_probability_max?.[0] ?? '—';
             const sunrise = d.sunrise?.[0] ? fmtTime(d.sunrise[0]) : '—';
             const sunset = d.sunset?.[0] ? fmtTime(d.sunset[0]) : '—';
@@ -3644,9 +3265,9 @@
             if (aqi != null) {
                 const cat = getAQICat(aqi);
                 aqiHTML = `<div class="aqi-row">
-          <span class="aqi-badge" style="background:${cat.color}">${cat.icon} AQI ${aqi}</span>
-          <span class="aqi-label">${cat.label}</span>
-        </div>`;
+                    <span class="aqi-badge" style="background:${cat.color}">${cat.icon} AQI ${aqi}</span>
+                    <span class="aqi-label">${cat.label}</span>
+                </div>`;
             }
 
             let forecastHTML = '';
@@ -3658,39 +3279,39 @@
                     const maxT = Math.round(d.temperature_2m_max[i]);
                     const minT = Math.round(d.temperature_2m_min[i]);
                     forecastHTML += `
-            <div class="forecast-day">
-              <span class="day-label">${dayName}</span>
-              <span class="day-icon">${dayInfo.icon}</span>
-              <span class="day-temp">${maxT}°<span class="min">/${minT}°</span></span>
-            </div>`;
+                        <div class="forecast-day">
+                            <span class="day-label">${dayName}</span>
+                            <span class="day-icon">${dayInfo.icon}</span>
+                            <span class="day-temp">${maxT}°<span class="min">/${minT}°</span></span>
+                        </div>`;
                 }
                 forecastHTML += '</div>';
             }
 
             const inner = document.createElement('div');
             inner.innerHTML = `
-        <div class="card-header">
-          <span class="city-name">${city.name}</span>
-          <span class="weather-icon">${info.icon}</span>
-        </div>
-        <div class="temp-main">${temp}°C</div>
-        <div class="weather-desc">${info.desc}</div>
-        ${aqiHTML}
-        <div class="details">
-          <span class="detail-item">💧 ${humidity}%</span>
-          <span class="detail-item">🌡️ ${feels}°</span>
-          <span class="detail-item">💨 ${wind} km/h</span>
-          <span class="detail-item">🧭 ${c.wind_direction_10m ?? '—'}°</span>
-          <span class="detail-item">🔽 ${pressure} hPa</span>
-          <span class="detail-item">👁️ ${visibility} km</span>
-          <span class="detail-item">💧 ${dew}° dew</span>
-          <span class="detail-item">☀️ UV ${uv}</span>
-          <span class="detail-item">🌧️ ${precipProb}%</span>
-          <span class="detail-item">🌅 ${sunrise}</span>
-          <span class="detail-item">🌇 ${sunset}</span>
-        </div>
-        ${forecastHTML}
-      `;
+                <div class="card-header">
+                    <span class="city-name">${city.name}</span>
+                    <span class="weather-icon">${info.icon}</span>
+                </div>
+                <div class="temp-main">${temp}°C</div>
+                <div class="weather-desc">${info.desc}</div>
+                ${aqiHTML}
+                <div class="details">
+                    <span class="detail-item">💧 ${humidity}%</span>
+                    <span class="detail-item">🌡️ ${feels}°</span>
+                    <span class="detail-item">💨 ${wind} km/h</span>
+                    <span class="detail-item">🧭 ${c.wind_direction_10m ?? '—'}°</span>
+                    <span class="detail-item">🔽 ${pressure} hPa</span>
+                    <span class="detail-item">👁️ ${visibility} km</span>
+                    <span class="detail-item">💧 ${dew}° dew</span>
+                    <span class="detail-item">☀️ UV ${uv}</span>
+                    <span class="detail-item">🌧️ ${precipProb}%</span>
+                    <span class="detail-item">🌅 ${sunrise}</span>
+                    <span class="detail-item">🌇 ${sunset}</span>
+                </div>
+                ${forecastHTML}
+            `;
             card.appendChild(inner);
             return card;
         }
@@ -3720,7 +3341,6 @@
 
             try {
                 const validResults = await fetchAllCitiesData(cities);
-
                 const successCount = validResults.filter(r => r.weather && r.weather.current).length;
                 const totalCount = validResults.length;
 
@@ -3737,7 +3357,7 @@
                         setStatus(`Partial ⚠️ (${successCount}/${totalCount})`);
                     }
                 } else {
-                    let usedCache = false;
+                    // All APIs failed → try cache
                     let cachedData = null;
                     let cacheSource = '';
 
@@ -3745,17 +3365,15 @@
                     if (cacheResult && cacheResult.data) {
                         cachedData = cacheResult.data;
                         cacheSource = 'Cache API';
-                        usedCache = true;
                     } else {
                         const storageCache = loadWeatherCacheFromStorage();
                         if (storageCache && storageCache.data) {
                             cachedData = storageCache.data;
                             cacheSource = 'localStorage';
-                            usedCache = true;
                         }
                     }
 
-                    if (usedCache && cachedData) {
+                    if (cachedData) {
                         console.log(`📦 Using cached data from ${cacheSource}`);
                         renderCards(cachedData);
                         errorBanner.classList.remove('visible');
@@ -3891,11 +3509,8 @@
 
         function initFeedbackState() {
             const saved = hasConsent() ? storeGet(COOKIE_FEEDBACK_KEY) : null;
-            if (saved === '1') {
-                setFeedbackOpen(true, false);
-            } else {
-                setFeedbackOpen(false, false);
-            }
+            if (saved === '1') setFeedbackOpen(true, false);
+            else setFeedbackOpen(false, false);
         }
 
         const feedbackForm = document.getElementById('feedbackForm');
@@ -3932,16 +3547,9 @@
         function setEmailIndicator(state) {
             emailIndicator.className = 'email-indicator';
             emailIndicator.textContent = '';
-            if (state === 'valid') {
-                emailIndicator.classList.add('visible', 'valid');
-                emailIndicator.textContent = '✓';
-            } else if (state === 'invalid') {
-                emailIndicator.classList.add('visible', 'invalid');
-                emailIndicator.textContent = '✕';
-            } else if (state === 'checking') {
-                emailIndicator.classList.add('visible', 'checking');
-                emailIndicator.textContent = '⟳';
-            }
+            if (state === 'valid') { emailIndicator.classList.add('visible', 'valid'); emailIndicator.textContent = '✓'; }
+            else if (state === 'invalid') { emailIndicator.classList.add('visible', 'invalid'); emailIndicator.textContent = '✕'; }
+            else if (state === 'checking') { emailIndicator.classList.add('visible', 'checking'); emailIndicator.textContent = '⟳'; }
         }
 
         function showEmailMessage(type, html) {
@@ -3957,13 +3565,10 @@
         function validateEmailFull(email) {
             const value = email.trim();
             if (!value) return { valid: false, reason: 'empty', suggestion: null };
-
             const atCount = (value.match(/@/g) || []).length;
             if (atCount === 0) return { valid: false, reason: 'no-at', suggestion: null };
             if (atCount > 1) return { valid: false, reason: 'multiple-at', suggestion: null };
-
             const [local, domain] = value.split('@');
-
             if (!local) return { valid: false, reason: 'no-local', suggestion: null };
             if (!domain) return { valid: false, reason: 'no-domain', suggestion: null };
             if (!domain.includes('.')) return { valid: false, reason: 'no-dot', suggestion: null };
@@ -3971,27 +3576,18 @@
             if (/\.\./.test(value)) return { valid: false, reason: 'consecutive-dots', suggestion: null };
             if (local.startsWith('.') || local.endsWith('.')) return { valid: false, reason: 'dot-position', suggestion: null };
             if (!EMAIL_REGEX.test(value)) return { valid: false, reason: 'format', suggestion: null };
-
             const domainParts = domain.toLowerCase().split('.');
             const tld = domainParts[domainParts.length - 1];
             if (!/^[a-z]{2,}$/.test(tld)) return { valid: false, reason: 'tld', suggestion: null };
-
             const lowerDomain = domain.toLowerCase();
-            if (TYPO_MAP[lowerDomain]) {
-                return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
-            }
-
-            if (COMMON_DOMAINS.includes(lowerDomain)) {
-                return { valid: true, reason: 'ok', suggestion: null };
-            }
-
+            if (TYPO_MAP[lowerDomain]) return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
+            if (COMMON_DOMAINS.includes(lowerDomain)) return { valid: true, reason: 'ok', suggestion: null };
             for (const common of COMMON_DOMAINS) {
                 const distance = levenshtein(lowerDomain, common);
                 if (distance === 1 || (distance === 2 && lowerDomain.length > 6)) {
                     return { valid: false, reason: 'typo', suggestion: `${local}@${common}` };
                 }
             }
-
             return { valid: true, reason: 'ok', suggestion: null };
         }
 
@@ -4004,15 +3600,8 @@
             for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
             for (let i = 1; i <= b.length; i++) {
                 for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j] + 1
-                        );
-                    }
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+                    else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
                 }
             }
             return matrix[b.length][a.length];
@@ -4022,7 +3611,6 @@
 
         function runLiveEmailValidation() {
             const value = fbEmail.value;
-
             if (!value) {
                 clearError(groupEmail);
                 groupEmail.classList.remove('has-success');
@@ -4030,13 +3618,10 @@
                 hideEmailMessage();
                 return;
             }
-
             setEmailIndicator('checking');
             clearTimeout(emailValidateTimer);
-
             emailValidateTimer = setTimeout(() => {
                 const result = validateEmailFull(value);
-
                 if (result.valid) {
                     clearError(groupEmail);
                     groupEmail.classList.add('has-success');
@@ -4046,44 +3631,24 @@
                     showError(groupEmail);
                     groupEmail.classList.remove('has-success');
                     setEmailIndicator('invalid');
-
                     let message = 'Invalid email address.';
-                    if (result.reason === 'empty') message = 'Please enter your email address.';
-                    else if (result.reason === 'no-at') message = 'Missing "@" symbol.';
-                    else if (result.reason === 'multiple-at') message = 'Only one "@" is allowed.';
-                    else if (result.reason === 'no-local') message = 'Missing username before "@".';
-                    else if (result.reason === 'no-domain') message = 'Missing domain after "@".';
+                    if (result.reason === 'no-at') message = 'Missing "@" symbol.';
                     else if (result.reason === 'no-dot') message = 'Domain is missing a dot (e.g. .com).';
                     else if (result.reason === 'spaces') message = 'Email cannot contain spaces.';
-                    else if (result.reason === 'consecutive-dots') message = 'Email cannot contain "..".';
-                    else if (result.reason === 'dot-position') message = 'Email cannot start or end with a dot.';
-                    else if (result.reason === 'tld') message = 'Domain extension is invalid.';
-                    else if (result.reason === 'format') message = 'Email format is not valid.';
-
                     if (result.suggestion) {
-                        const suggestion = result.suggestion;
                         emailMessage.className = 'email-validation-message visible warning';
-                        emailMessage.innerHTML = `
-              <span class="msg-icon">⚠</span>
-              <span class="msg-text">
-                Did you mean
-                <button type="button" class="msg-suggestion" id="emailSuggestionBtn">${suggestion}</button>?
-              </span>
-            `;
+                        emailMessage.innerHTML = `<span class="msg-icon">⚠</span><span class="msg-text">Did you mean <button type="button" class="msg-suggestion" id="emailSuggestionBtn">${result.suggestion}</button>?</span>`;
                         setTimeout(() => {
                             const btn = document.getElementById('emailSuggestionBtn');
-                            if (btn) {
-                                btn.addEventListener('click', (e) => {
-                                    e.preventDefault();
-                                    fbEmail.value = suggestion;
-                                    fbEmail.focus();
-                                    runLiveEmailValidation();
-                                });
-                            }
+                            if (btn) btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                fbEmail.value = result.suggestion;
+                                fbEmail.focus();
+                                runLiveEmailValidation();
+                            });
                         }, 0);
                     } else {
-                        showEmailMessage('invalid',
-                            `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
+                        showEmailMessage('invalid', `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
                     }
                 }
             }, 250);
@@ -4091,62 +3656,6 @@
 
         fbEmail.addEventListener('input', runLiveEmailValidation);
         fbEmail.addEventListener('paste', () => setTimeout(runLiveEmailValidation, 0));
-
-        fbEmail.addEventListener('blur', () => {
-            clearTimeout(emailValidateTimer);
-            const value = fbEmail.value.trim();
-            if (!value) {
-                clearError(groupEmail);
-                groupEmail.classList.remove('has-success');
-                setEmailIndicator('none');
-                hideEmailMessage();
-                return;
-            }
-            const result = validateEmailFull(value);
-            if (result.valid) {
-                clearError(groupEmail);
-                groupEmail.classList.add('has-success');
-                setEmailIndicator('valid');
-                showEmailMessage('valid', '<span class="msg-icon">✓</span><span class="msg-text">Email looks good</span>');
-            } else {
-                showError(groupEmail);
-                groupEmail.classList.remove('has-success');
-                setEmailIndicator('invalid');
-                let message = 'Invalid email address.';
-                if (result.reason === 'typo' && result.suggestion) {
-                    emailMessage.className = 'email-validation-message visible warning';
-                    emailMessage.innerHTML = `
-            <span class="msg-icon">⚠</span>
-            <span class="msg-text">
-              Did you mean
-              <button type="button" class="msg-suggestion" id="emailSuggestionBtnBlur">${result.suggestion}</button>?
-            </span>
-          `;
-                    setTimeout(() => {
-                        const btn = document.getElementById('emailSuggestionBtnBlur');
-                        if (btn) {
-                            btn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                fbEmail.value = result.suggestion;
-                                fbEmail.focus();
-                                runLiveEmailValidation();
-                            });
-                        }
-                    }, 0);
-                    return;
-                }
-                if (result.reason === 'no-at') message = 'Missing "@" symbol.';
-                else if (result.reason === 'multiple-at') message = 'Only one "@" is allowed.';
-                else if (result.reason === 'no-local') message = 'Missing username before "@".';
-                else if (result.reason === 'no-domain') message = 'Missing domain after "@".';
-                else if (result.reason === 'no-dot') message = 'Domain is missing a dot (e.g. .com).';
-                else if (result.reason === 'spaces') message = 'Email cannot contain spaces.';
-                else if (result.reason === 'consecutive-dots') message = 'Email cannot contain "..".';
-                else if (result.reason === 'format') message = 'Email format is not valid.';
-                showEmailMessage('invalid',
-                    `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
-            }
-        });
 
         function clearError(group) { group.classList.remove('has-error'); }
         function showError(group) { group.classList.add('has-error'); }
@@ -4172,7 +3681,6 @@
 
         fbName.addEventListener('input', () => { if (fbName.value.trim().length > 0) clearError(groupName); });
         fbMessage.addEventListener('input', () => { if (fbMessage.value.trim().length > 0) clearError(groupMessage); });
-
         fbName.addEventListener('blur', validateName);
         fbMessage.addEventListener('blur', validateMessage);
 
@@ -4193,23 +3701,15 @@
                 setEmailIndicator('invalid');
                 if (emailResult.suggestion) {
                     emailMessage.className = 'email-validation-message visible warning';
-                    emailMessage.innerHTML = `
-            <span class="msg-icon">⚠</span>
-            <span class="msg-text">
-              Did you mean
-              <button type="button" class="msg-suggestion" id="emailSuggestionSubmit">${emailResult.suggestion}</button>?
-            </span>
-          `;
+                    emailMessage.innerHTML = `<span class="msg-icon">⚠</span><span class="msg-text">Did you mean <button type="button" class="msg-suggestion" id="emailSuggestionSubmit">${emailResult.suggestion}</button>?</span>`;
                     setTimeout(() => {
                         const btn = document.getElementById('emailSuggestionSubmit');
-                        if (btn) {
-                            btn.addEventListener('click', (ev) => {
-                                ev.preventDefault();
-                                fbEmail.value = emailResult.suggestion;
-                                fbEmail.focus();
-                                runLiveEmailValidation();
-                            });
-                        }
+                        if (btn) btn.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            fbEmail.value = emailResult.suggestion;
+                            fbEmail.focus();
+                            runLiveEmailValidation();
+                        });
                     }, 0);
                 } else {
                     showEmailMessage('invalid', '<span class="msg-icon">✕</span><span class="msg-text">Please enter a valid email address.</span>');
@@ -4221,9 +3721,7 @@
             if (!nameOk || !emailOk || !messageOk) {
                 e.preventDefault();
                 const firstError = feedbackForm.querySelector('.has-error');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
 
@@ -4231,17 +3729,11 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 hiddenPausedAt = Date.now();
-                if (countdownTimer) {
-                    clearInterval(countdownTimer);
-                    countdownTimer = null;
-                }
+                if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
             } else {
                 const hiddenFor = Date.now() - hiddenPausedAt;
-                if (hiddenFor > 5 * 60 * 1000) {
-                    updateAll();
-                } else {
-                    startCountdown();
-                }
+                if (hiddenFor > 5 * 60 * 1000) updateAll();
+                else startCountdown();
             }
         });
 
@@ -4263,6 +3755,7 @@
                 }
             } catch (e) { }
 
+            // Render cached data immediately if available
             if (getConsent()) {
                 const cacheResult = await cacheGet('weather-data');
                 if (cacheResult && cacheResult.data) {
