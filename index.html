@@ -1208,381 +1208,6 @@
             transform: translateX(4px);
         }
 
-        .feedback {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            transition: background 0.3s;
-        }
-
-        .feedback-toggle {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-family: inherit;
-            padding: 1rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: background 0.2s;
-            text-align: left;
-            min-height: 60px;
-        }
-
-        .feedback-toggle:hover {
-            background: var(--card-bg-hover);
-        }
-
-        .feedback-toggle:active {
-            background: rgba(56, 189, 248, 0.05);
-        }
-
-        .feedback-toggle-content {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            min-width: 0;
-        }
-
-        .feedback-toggle-icon {
-            font-size: 1.3rem;
-            line-height: 1;
-            flex-shrink: 0;
-            display: inline-block;
-            animation: feedbackIconBounce 4s ease-in-out infinite;
-        }
-
-        @keyframes feedbackIconBounce {
-
-            0%,
-            85%,
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-
-            90% {
-                transform: translateY(-3px) rotate(-8deg);
-            }
-
-            95% {
-                transform: translateY(0) rotate(8deg);
-            }
-        }
-
-        .feedback-toggle-text {
-            display: flex;
-            flex-direction: column;
-            gap: 0.1rem;
-            min-width: 0;
-        }
-
-        .feedback-toggle-title {
-            font-size: clamp(0.95rem, 2.2vw, 1.1rem);
-            font-weight: 700;
-        }
-
-        .feedback-toggle-sub {
-            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-            color: var(--text-muted);
-        }
-
-        .feedback-toggle-arrow {
-            font-size: 1rem;
-            color: var(--text-muted);
-            flex-shrink: 0;
-            transition: transform 0.3s ease;
-        }
-
-        .feedback.open .feedback-toggle-arrow {
-            transform: rotate(180deg);
-        }
-
-        .feedback-body {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-        }
-
-        .feedback.open .feedback-body {
-            max-height: 1200px;
-        }
-
-        .feedback-inner {
-            padding: 1.25rem 1.25rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .feedback-form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-            width: 100%;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.85rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-
-        .form-group label {
-            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 16px;
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
-
-        .email-input-wrapper {
-            position: relative;
-        }
-
-        .email-input-wrapper input {
-            padding-right: 2.75rem;
-        }
-
-        .email-indicator {
-            position: absolute;
-            top: 50%;
-            right: 0.75rem;
-            transform: translateY(-50%);
-            font-size: 1rem;
-            line-height: 1;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-        .email-indicator.visible {
-            opacity: 1;
-        }
-
-        .email-indicator.valid {
-            color: var(--success-green);
-            animation: emailOkPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .email-indicator.invalid {
-            color: var(--error-red);
-            animation: errorShake 0.3s ease;
-        }
-
-        .email-indicator.checking {
-            color: var(--text-muted);
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes emailOkPop {
-            0% {
-                transform: translateY(-50%) scale(0.5);
-            }
-
-            60% {
-                transform: translateY(-50%) scale(1.15);
-            }
-
-            100% {
-                transform: translateY(-50%) scale(1);
-            }
-        }
-
-        .email-validation-message {
-            display: none;
-            font-size: 0.75rem;
-            margin-top: 0.15rem;
-            line-height: 1.4;
-            animation: errorShake 0.3s ease;
-        }
-
-        .email-validation-message.visible {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.35rem;
-        }
-
-        .email-validation-message.valid {
-            color: var(--success-green);
-        }
-
-        .email-validation-message.invalid {
-            color: var(--error-red);
-        }
-
-        .email-validation-message.warning {
-            color: var(--warning-amber);
-        }
-
-        .email-validation-message .msg-icon {
-            flex-shrink: 0;
-            line-height: 1.4;
-        }
-
-        .email-validation-message .msg-text {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .email-validation-message .msg-suggestion {
-            display: inline;
-            background: none;
-            border: none;
-            color: var(--accent);
-            text-decoration: underline;
-            cursor: pointer;
-            font: inherit;
-            padding: 0;
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .email-validation-message .msg-suggestion:hover {
-            opacity: 0.8;
-        }
-
-        .form-group.has-error input,
-        .form-group.has-error textarea {
-            border-color: var(--error-red);
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-        }
-
-        .form-group.has-error label {
-            color: var(--error-red);
-        }
-
-        .form-group.has-success input {
-            border-color: var(--success-green);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
-        }
-
-        .form-error {
-            display: none;
-            font-size: 0.75rem;
-            color: var(--error-red);
-            margin-top: 0.15rem;
-            line-height: 1.4;
-            animation: errorShake 0.3s ease;
-        }
-
-        .form-group.has-error .form-error {
-            display: block;
-        }
-
-        @keyframes errorShake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-3px);
-            }
-
-            75% {
-                transform: translateX(3px);
-            }
-        }
-
-        .form-status {
-            display: none;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-align: center;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .form-status.visible {
-            display: block;
-        }
-
-        .form-status.success {
-            background: rgba(34, 197, 94, 0.12);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .form-status.error {
-            background: rgba(239, 68, 68, 0.12);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .submit-btn {
-            background: var(--accent);
-            color: #0f172a;
-            border: none;
-            padding: 0.85rem 1.5rem;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            align-self: flex-start;
-            min-height: 48px;
-            touch-action: manipulation;
-            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-btn:not(:disabled):hover {
-            background: #7dd3fc;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px -8px rgba(56, 189, 248, 0.6);
-        }
-
-        .submit-btn:not(:disabled):active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
         .footer {
             text-align: center;
             font-size: clamp(0.7rem, 1.6vw, 0.85rem);
@@ -2156,8 +1781,6 @@
             .icon-btn { width: 42px; height: 42px; min-width: 42px; font-size: 1.15rem; }
             .card { padding: 1rem; }
             .cards { grid-template-columns: 1fr; gap: 1.25rem; }
-            .form-row { grid-template-columns: 1fr; }
-            .submit-btn { align-self: stretch; width: 100%; }
             .cookie-content { flex-direction: column; align-items: stretch; }
             .cookie-actions { flex-direction: column; }
             .cookie-btn { width: 100%; }
@@ -2180,15 +1803,9 @@
             .forecast-day .day-icon { font-size: 1rem; }
             .forecast-day .day-temp { font-size: 0.6rem; }
             .suggestions { max-height: 220px; }
-            .form-row { grid-template-columns: 1fr; gap: 0.7rem; }
-            .submit-btn { align-self: stretch; width: 100%; }
             .cookie-content { flex-direction: column; align-items: stretch; gap: 0.85rem; }
             .cookie-actions { flex-direction: column; }
             .cookie-btn { width: 100%; }
-            .feedback-toggle { padding: 0.9rem 1rem; min-height: 56px; }
-            .feedback-toggle-title { font-size: 0.95rem; }
-            .feedback-toggle-sub { font-size: 0.7rem; }
-            .feedback-inner { padding: 1rem 1rem 1.25rem; gap: 0.85rem; }
             .telegram-section { padding: 0.9rem 1rem; min-height: 56px; }
             .telegram-icon { width: 34px; height: 34px; min-width: 34px; }
             .telegram-title { font-size: 0.95rem; }
@@ -2209,7 +1826,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-            .ambient-bg, .weather-icon, .title h1 .title-icon, #refreshBtn, .live-dot::after, .cookie-icon, .feedback-toggle-icon, .telegram-icon, .disclaimer-icon, .aqi-badge, .cd-sep { animation: none; }
+            .ambient-bg, .weather-icon, .title h1 .title-icon, #refreshBtn, .live-dot::after, .cookie-icon, .telegram-icon, .disclaimer-icon, .aqi-badge, .cd-sep { animation: none; }
             .header::after { animation: none; opacity: 0; }
         }
 
@@ -2320,57 +1937,6 @@
             </span>
             <span class="telegram-arrow" aria-hidden="true">→</span>
         </a>
-
-        <section class="feedback" id="feedbackSection">
-            <button class="feedback-toggle" id="feedbackToggle" aria-expanded="false" aria-controls="feedbackBody">
-                <span class="feedback-toggle-content">
-                    <span class="feedback-toggle-icon">💬</span>
-                    <span class="feedback-toggle-text">
-                        <span class="feedback-toggle-title">Send Feedback</span>
-                        <span class="feedback-toggle-sub">Have a suggestion or found a bug?</span>
-                    </span>
-                </span>
-                <span class="feedback-toggle-arrow">▼</span>
-            </button>
-
-            <div class="feedback-body" id="feedbackBody">
-                <div class="feedback-inner">
-                    <form class="feedback-form" id="feedbackForm" action="https://formsubmit.co/amirmohamad.hodaei2010@gmail.com" method="POST" novalidate>
-                        <input type="hidden" name="_subject" value="Weather Site Feedback">
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_next" value="https://weather-sudo.github.io/amir/?feedback=success">
-
-                        <div class="form-row">
-                            <div class="form-group" id="group-name">
-                                <label for="fb-name">Your name</label>
-                                <input type="text" id="fb-name" name="name" placeholder="Your name" autocomplete="name">
-                                <div class="form-error" id="error-name">Please enter your name.</div>
-                            </div>
-                            <div class="form-group" id="group-email">
-                                <label for="fb-email">Your email</label>
-                                <div class="email-input-wrapper">
-                                    <input type="email" id="fb-email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email" spellcheck="false">
-                                    <span class="email-indicator" id="emailIndicator"></span>
-                                </div>
-                                <div class="email-validation-message" id="emailMessage"></div>
-                                <div class="form-error" id="error-email">Please enter a valid email address.</div>
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="group-message">
-                            <label for="fb-message">Your message</label>
-                            <textarea id="fb-message" name="message" placeholder="Write your suggestion or criticism here…"></textarea>
-                            <div class="form-error" id="error-message">Please write your message.</div>
-                        </div>
-
-                        <div class="form-status" id="formStatus"></div>
-
-                        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
-                    </form>
-                </div>
-            </div>
-        </section>
 
         <footer class="footer">
             <div id="countdown" class="countdown">
@@ -2533,7 +2099,6 @@
         const COOKIE_CITIES_KEY = 'iran_weather_cities';
         const COOKIE_THEME_KEY = 'iran_weather_theme';
         const COOKIE_CACHE_KEY = 'iran_weather_cache';
-        const COOKIE_FEEDBACK_KEY = 'iran_weather_feedback_open';
         const COOKIE_DAYS = 365;
 
         const CACHE_NAME = 'iran-weather-cache-v1';
@@ -2574,7 +2139,7 @@
             99: { desc: 'Thunderstorm w/ heavy hail', icon: '⛈️' }
         };
 
-        // ✅ WWW weather code (wttr.in) -> WMO weather code mapping
+        // WWW weather code (wttr.in) -> WMO weather code mapping
         const WWW_TO_WMO = {
             113: 0, 116: 2, 119: 3, 122: 3,
             143: 45, 248: 45, 260: 48,
@@ -3152,7 +2717,7 @@
             }));
         }
 
-        // ✅ Convert wttr.in time ("06:12 AM") to ISO-like string
+        // Convert wttr.in time ("06:12 AM") to ISO-like string
         function parseWttrTime(timeStr, dateStr) {
             if (!timeStr) return null;
             const match = String(timeStr).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -3480,249 +3045,9 @@
                 '• iran_weather_cookie_consent — stores your cookie choice\n' +
                 '• iran_weather_theme — remembers light/dark mode\n' +
                 '• iran_weather_cities — saves your selected cities\n' +
-                '• iran_weather_cache — caches weather data for offline use\n' +
-                '• iran_weather_feedback_open — remembers feedback section state\n\n' +
+                '• iran_weather_cache — caches weather data for offline use\n\n' +
                 'All data stays in your browser. We do not track you.'
             );
-        });
-
-        const feedbackSection = document.getElementById('feedbackSection');
-        const feedbackToggle = document.getElementById('feedbackToggle');
-
-        function setFeedbackOpen(open, save = true) {
-            if (open) {
-                feedbackSection.classList.add('open');
-                feedbackToggle.setAttribute('aria-expanded', 'true');
-            } else {
-                feedbackSection.classList.remove('open');
-                feedbackToggle.setAttribute('aria-expanded', 'false');
-            }
-            if (save && hasConsent()) {
-                storeSet(COOKIE_FEEDBACK_KEY, open ? '1' : '0', COOKIE_DAYS);
-            }
-        }
-
-        feedbackToggle.addEventListener('click', () => {
-            const isOpen = feedbackSection.classList.contains('open');
-            setFeedbackOpen(!isOpen);
-        });
-
-        function initFeedbackState() {
-            const saved = hasConsent() ? storeGet(COOKIE_FEEDBACK_KEY) : null;
-            if (saved === '1') setFeedbackOpen(true, false);
-            else setFeedbackOpen(false, false);
-        }
-
-        const feedbackForm = document.getElementById('feedbackForm');
-        const fbName = document.getElementById('fb-name');
-        const fbEmail = document.getElementById('fb-email');
-        const fbMessage = document.getElementById('fb-message');
-        const groupName = document.getElementById('group-name');
-        const groupEmail = document.getElementById('group-email');
-        const groupMessage = document.getElementById('group-message');
-        const formStatus = document.getElementById('formStatus');
-        const submitBtn = document.getElementById('submitBtn');
-        const emailIndicator = document.getElementById('emailIndicator');
-        const emailMessage = document.getElementById('emailMessage');
-
-        const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
-        const COMMON_DOMAINS = [
-            'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com',
-            'icloud.com', 'aol.com', 'protonmail.com', 'proton.me', 'zoho.com',
-            'mail.com', 'gmx.com', 'yandex.com', 'msn.com'
-        ];
-
-        const TYPO_MAP = {
-            'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmil.com': 'gmail.com',
-            'gmaill.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.cm': 'gmail.com',
-            'gmail.con': 'gmail.com', 'gmal.com': 'gmail.com', 'gamil.com': 'gmail.com',
-            'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.co': 'yahoo.com',
-            'hotmial.com': 'hotmail.com', 'hotmai.com': 'hotmail.com', 'hotmal.com': 'hotmail.com',
-            'outlok.com': 'outlook.com', 'outloo.com': 'outlook.com', 'outlook.co': 'outlook.com',
-            'iclod.com': 'icloud.com', 'icloud.co': 'icloud.com', 'iclou.com': 'icloud.com',
-            'protonmai.com': 'protonmail.com', 'protonmal.com': 'protonmail.com'
-        };
-
-        function setEmailIndicator(state) {
-            emailIndicator.className = 'email-indicator';
-            emailIndicator.textContent = '';
-            if (state === 'valid') { emailIndicator.classList.add('visible', 'valid'); emailIndicator.textContent = '✓'; }
-            else if (state === 'invalid') { emailIndicator.classList.add('visible', 'invalid'); emailIndicator.textContent = '✕'; }
-            else if (state === 'checking') { emailIndicator.classList.add('visible', 'checking'); emailIndicator.textContent = '⟳'; }
-        }
-
-        function showEmailMessage(type, html) {
-            emailMessage.className = `email-validation-message visible ${type}`;
-            emailMessage.innerHTML = html;
-        }
-
-        function hideEmailMessage() {
-            emailMessage.className = 'email-validation-message';
-            emailMessage.innerHTML = '';
-        }
-
-        function validateEmailFull(email) {
-            const value = email.trim();
-            if (!value) return { valid: false, reason: 'empty', suggestion: null };
-            const atCount = (value.match(/@/g) || []).length;
-            if (atCount === 0) return { valid: false, reason: 'no-at', suggestion: null };
-            if (atCount > 1) return { valid: false, reason: 'multiple-at', suggestion: null };
-            const [local, domain] = value.split('@');
-            if (!local) return { valid: false, reason: 'no-local', suggestion: null };
-            if (!domain) return { valid: false, reason: 'no-domain', suggestion: null };
-            if (!domain.includes('.')) return { valid: false, reason: 'no-dot', suggestion: null };
-            if (/\s/.test(value)) return { valid: false, reason: 'spaces', suggestion: null };
-            if (/\.\./.test(value)) return { valid: false, reason: 'consecutive-dots', suggestion: null };
-            if (local.startsWith('.') || local.endsWith('.')) return { valid: false, reason: 'dot-position', suggestion: null };
-            if (!EMAIL_REGEX.test(value)) return { valid: false, reason: 'format', suggestion: null };
-            const domainParts = domain.toLowerCase().split('.');
-            const tld = domainParts[domainParts.length - 1];
-            if (!/^[a-z]{2,}$/.test(tld)) return { valid: false, reason: 'tld', suggestion: null };
-            const lowerDomain = domain.toLowerCase();
-            if (TYPO_MAP[lowerDomain]) return { valid: false, reason: 'typo', suggestion: `${local}@${TYPO_MAP[lowerDomain]}` };
-            if (COMMON_DOMAINS.includes(lowerDomain)) return { valid: true, reason: 'ok', suggestion: null };
-            for (const common of COMMON_DOMAINS) {
-                const distance = levenshtein(lowerDomain, common);
-                if (distance === 1 || (distance === 2 && lowerDomain.length > 6)) {
-                    return { valid: false, reason: 'typo', suggestion: `${local}@${common}` };
-                }
-            }
-            return { valid: true, reason: 'ok', suggestion: null };
-        }
-
-        function levenshtein(a, b) {
-            if (a === b) return 0;
-            if (!a.length) return b.length;
-            if (!b.length) return a.length;
-            const matrix = [];
-            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
-                    else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-                }
-            }
-            return matrix[b.length][a.length];
-        }
-
-        let emailValidateTimer = null;
-
-        function runLiveEmailValidation() {
-            const value = fbEmail.value;
-            if (!value) {
-                clearError(groupEmail);
-                groupEmail.classList.remove('has-success');
-                setEmailIndicator('none');
-                hideEmailMessage();
-                return;
-            }
-            setEmailIndicator('checking');
-            clearTimeout(emailValidateTimer);
-            emailValidateTimer = setTimeout(() => {
-                const result = validateEmailFull(value);
-                if (result.valid) {
-                    clearError(groupEmail);
-                    groupEmail.classList.add('has-success');
-                    setEmailIndicator('valid');
-                    showEmailMessage('valid', '<span class="msg-icon">✓</span><span class="msg-text">Email looks good</span>');
-                } else {
-                    showError(groupEmail);
-                    groupEmail.classList.remove('has-success');
-                    setEmailIndicator('invalid');
-                    let message = 'Invalid email address.';
-                    if (result.reason === 'no-at') message = 'Missing "@" symbol.';
-                    else if (result.reason === 'no-dot') message = 'Domain is missing a dot (e.g. .com).';
-                    else if (result.reason === 'spaces') message = 'Email cannot contain spaces.';
-                    if (result.suggestion) {
-                        emailMessage.className = 'email-validation-message visible warning';
-                        emailMessage.innerHTML = `<span class="msg-icon">⚠</span><span class="msg-text">Did you mean <button type="button" class="msg-suggestion" id="emailSuggestionBtn">${result.suggestion}</button>?</span>`;
-                        setTimeout(() => {
-                            const btn = document.getElementById('emailSuggestionBtn');
-                            if (btn) btn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                fbEmail.value = result.suggestion;
-                                fbEmail.focus();
-                                runLiveEmailValidation();
-                            });
-                        }, 0);
-                    } else {
-                        showEmailMessage('invalid', `<span class="msg-icon">✕</span><span class="msg-text">${message}</span>`);
-                    }
-                }
-            }, 250);
-        }
-
-        fbEmail.addEventListener('input', runLiveEmailValidation);
-        fbEmail.addEventListener('paste', () => setTimeout(runLiveEmailValidation, 0));
-
-        function clearError(group) { group.classList.remove('has-error'); }
-        function showError(group) { group.classList.add('has-error'); }
-        function showFormStatus(type, message) {
-            formStatus.textContent = message;
-            formStatus.className = `form-status visible ${type}`;
-        }
-        function hideFormStatus() {
-            formStatus.className = 'form-status';
-            formStatus.textContent = '';
-        }
-
-        function validateName() {
-            const ok = fbName.value.trim().length > 0;
-            if (ok) clearError(groupName); else showError(groupName);
-            return ok;
-        }
-        function validateMessage() {
-            const ok = fbMessage.value.trim().length > 0;
-            if (ok) clearError(groupMessage); else showError(groupMessage);
-            return ok;
-        }
-
-        fbName.addEventListener('input', () => { if (fbName.value.trim().length > 0) clearError(groupName); });
-        fbMessage.addEventListener('input', () => { if (fbMessage.value.trim().length > 0) clearError(groupMessage); });
-        fbName.addEventListener('blur', validateName);
-        fbMessage.addEventListener('blur', validateMessage);
-
-        feedbackForm.addEventListener('submit', (e) => {
-            hideFormStatus();
-            clearError(groupName);
-            clearError(groupEmail);
-            clearError(groupMessage);
-            groupEmail.classList.remove('has-success');
-
-            const nameOk = validateName();
-            const messageOk = validateMessage();
-            const emailResult = validateEmailFull(fbEmail.value);
-            const emailOk = emailResult.valid;
-
-            if (!emailOk) {
-                showError(groupEmail);
-                setEmailIndicator('invalid');
-                if (emailResult.suggestion) {
-                    emailMessage.className = 'email-validation-message visible warning';
-                    emailMessage.innerHTML = `<span class="msg-icon">⚠</span><span class="msg-text">Did you mean <button type="button" class="msg-suggestion" id="emailSuggestionSubmit">${emailResult.suggestion}</button>?</span>`;
-                    setTimeout(() => {
-                        const btn = document.getElementById('emailSuggestionSubmit');
-                        if (btn) btn.addEventListener('click', (ev) => {
-                            ev.preventDefault();
-                            fbEmail.value = emailResult.suggestion;
-                            fbEmail.focus();
-                            runLiveEmailValidation();
-                        });
-                    }, 0);
-                } else {
-                    showEmailMessage('invalid', '<span class="msg-icon">✕</span><span class="msg-text">Please enter a valid email address.</span>');
-                }
-            } else {
-                groupEmail.classList.add('has-success');
-            }
-
-            if (!nameOk || !emailOk || !messageOk) {
-                e.preventDefault();
-                const firstError = feedbackForm.querySelector('.has-error');
-                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
         });
 
         let hiddenPausedAt = 0;
@@ -3741,19 +3066,6 @@
             intervalLabel.textContent = REFRESH_HOURS;
             cities = loadCities();
             initThemeFromStorage();
-            initFeedbackState();
-
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('feedback') === 'success') {
-                    window.history.replaceState({}, '', window.location.pathname);
-                    setTimeout(() => {
-                        setFeedbackOpen(true, false);
-                        showFormStatus('success', '✅ Thank you! Your message has been sent successfully.');
-                        setTimeout(hideFormStatus, 6000);
-                    }, 500);
-                }
-            } catch (e) { }
 
             // Render cached data immediately if available
             if (getConsent()) {
